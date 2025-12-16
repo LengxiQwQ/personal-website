@@ -67,7 +67,7 @@ const WALLPAPER_PRESETS = [
     { name: "赛博朋克", url: "https://images.unsplash.com/photo-1555680202-c86f0e12f086?q=80&w=2670&auto=format&fit=crop" },
 ];
 
-const AVATAR_URL = "https://cdn.jsdelivr.net/gh/LengxiQwQ/assets/my-site/images-host/vavtar.jpg";
+const AVATAR_URL = "https://github.com/LengxiQwQ/assets/blob/main/avatar/%E4%BA%8C%E6%AC%A1%E5%85%83/20230327215624_f83de.jpg?raw=true";
 const WALLPAPER_REPO_URL = "https://github.com/LengxiQwQ/assets/tree/main/wallpaper/my-site-wallpaper";
 
 const SOCIAL_LINKS = [
