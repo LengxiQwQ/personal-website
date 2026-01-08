@@ -7,17 +7,38 @@ import {
   Heart, Play, SkipForward, Palette, X, MapPin, GraduationCap,
   Zap, Mail, Copy, Check, Instagram, Gamepad2, ExternalLink, Star, 
   Settings, Sliders, Image as ImgIcon, Upload, Sparkles, Layout, Cloud, FolderGit2, Loader2, Plus,
-  Quote, Code, Terminal, BadgeCheck, MessageSquare, Camera, Link2, Smile, Layers, Monitor, Paintbrush, Globe, Languages
+  Quote, Code, Terminal, BadgeCheck, MessageSquare, Camera, Link2, Smile, Layers, Monitor, Paintbrush, Globe, Languages,
+  BookOpen, GitBranch, Eye, GitFork, Scale, Timer
 } from 'lucide-react';
 
+// --- Hook: 动态加载 marked.js (用于解析 Markdown) ---
+const useMarked = () => {
+  const [loaded, setLoaded] = useState(false);
+  useEffect(() => {
+    if (window.marked) {
+      setLoaded(true);
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/marked/marked.min.js';
+    script.onload = () => setLoaded(true);
+    document.body.appendChild(script);
+  }, []);
+  return loaded;
+};
+
 // --- 全局样式组件 ---
-const GlobalStyles = () => (
+const GlobalStyles = ({ hue, darkMode }) => (
   <style>{`
     @import url('https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap');
     @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap');
     
+    body {
+      font-family: 'PingFang SC', 'Microsoft YaHei', 'Nunito', sans-serif;
+    }
+
     .font-cute {
-      font-family: 'ZCOOL KuaiLe', 'Nunito', cursive;
+      font-family: 'ZCOOL KuaiLe', 'PingFang SC', cursive;
     }
     
     @keyframes fadeIn {
@@ -43,6 +64,30 @@ const GlobalStyles = () => (
       66% { transform: translate(-20px, 20px) scale(0.9); }
       100% { transform: translate(0px, 0px) scale(1); }
     }
+
+    /* --- Markdown 自定义样式 (适配阅读器) --- */
+    /* H1 作为文章标题，稍微加大间距 */
+    .markdown-body h1 { font-size: 2.2em; font-weight: 800; margin-bottom: 0.8em; border-bottom: none; line-height: 1.2; margin-top: 0; }
+    .markdown-body h2 { font-size: 1.5em; font-weight: bold; margin-bottom: 0.5em; margin-top: 1.5em; padding-bottom: 0.3em; border-bottom: 1px solid rgba(128,128,128,0.1); }
+    .markdown-body h3 { font-size: 1.25em; font-weight: bold; margin-bottom: 0.5em; margin-top: 1.2em; }
+    .markdown-body p { margin-bottom: 1.2em; line-height: 1.8; }
+    .markdown-body ul { list-style-type: disc; padding-left: 1.5em; margin-bottom: 1em; }
+    .markdown-body ol { list-style-type: decimal; padding-left: 1.5em; margin-bottom: 1em; }
+    .markdown-body li { margin-bottom: 0.3em; }
+    .markdown-body a { color: ${darkMode ? '#60a5fa' : '#3b82f6'}; text-decoration: none; border-bottom: 1px dashed transparent; transition: border-color 0.2s; }
+    .markdown-body a:hover { text-decoration: none; border-bottom-color: currentColor; }
+    .markdown-body blockquote { border-left: 4px solid ${darkMode ? '#3b82f6' : '#60a5fa'}; padding-left: 1em; color: ${darkMode ? '#9ca3af' : '#6b7280'}; margin: 1em 0; background: ${darkMode ? 'rgba(59,130,246,0.1)' : 'rgba(59,130,246,0.05)'}; padding: 0.8em 1em; border-radius: 0.5em; font-style: italic; }
+    .markdown-body code { font-family: monospace; background: ${darkMode ? '#374151' : '#f3f4f6'}; padding: 0.2em 0.4em; border-radius: 0.3em; font-size: 0.9em; color: ${darkMode ? '#f472b6' : '#db2777'}; }
+    .markdown-body pre { background: ${darkMode ? '#1f2937' : '#1e293b'}; color: #f3f4f6; padding: 1.2em; border-radius: 0.8em; overflow-x: auto; margin-bottom: 1.5em; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+    .markdown-body pre code { background: transparent; color: inherit; padding: 0; }
+    .markdown-body img { max-width: 100%; border-radius: 0.8em; margin: 1.5em auto; display: block; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+    .markdown-body hr { height: 1px; background-color: rgba(128,128,128,0.2); border: none; margin: 3em 0; }
+    
+    /* 滚动条样式 */
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(156, 163, 175, 0.5); border-radius: 3px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(156, 163, 175, 0.8); }
   `}</style>
 );
 
@@ -50,11 +95,13 @@ const GlobalStyles = () => (
 const translations = {
   zh: {
     common: {
-      name: '冷汐OωO',
-      name_simple: '冷汐'
+      name: '冷汐的小站',
+      profile_name: '冷汐OωO', // 专门用于个人资料的名字
     },
     nav: {
       home: '首页',
+      home_station: '冷汐的小站',
+      home_nest: '冷汐的小窝',
       daily: '日常',
       projects: '项目',
       articles: '文章',
@@ -62,7 +109,6 @@ const translations = {
       about: '关于'
     },
     hero: {
-      title_suffix: '的小站',
       scroll_down: '向下滚动'
     },
     profile: {
@@ -85,9 +131,9 @@ const translations = {
     stats: {
       title: '站点信息',
       articles: '文章数目',
-      runtime: '运行时间',
+      runtime: '运行天数', 
       visits: '访问次数',
-      days: '天'
+      days: '' 
     },
     home: {
       welcome_title: '👋 嗨，很高兴遇见你！',
@@ -102,10 +148,23 @@ const translations = {
       gallery_desc: '记录生活中的点点滴滴'
     },
     projects: {
-      title: '我的项目'
+      title: '我的项目库',
+      desc: '从 GitHub 自动同步的开源项目列表'
     },
     articles: {
       title: '文章列表'
+    },
+    github_reader: {
+      loading_repos: '正在从 GitHub 获取项目...',
+      select_repo: '👈 请从左侧选择一个项目查看详情',
+      no_readme: '暂无说明文档',
+      view_source: '源码',
+      words: '字',
+      reading_time: '分钟阅读',
+      license: '协议',
+      forks: 'Forks',
+      published: '发布于',
+      updated: '更新于'
     },
     links: {
       title: '友情链接',
@@ -117,7 +176,7 @@ const translations = {
       intro: '本站是一个基于现代前端技术栈构建的个人展示空间。设计上追求极简与美观的平衡，交互上注重流畅与响应式体验。\n无论是代码的编写还是界面的打磨，都倾注了对技术的热爱。',
       tech_stack: '技术栈',
       features: '设计特性',
-      version: '当前版本：v2.0.0 (Refactored)'
+      version: '当前版本：v2.1.0 (Refactored)'
     },
     settings: {
       title: '个性化设置',
@@ -137,11 +196,13 @@ const translations = {
   },
   en: {
     common: {
-      name: 'LengxiOωO',
-      name_simple: 'Lengxi'
+      name: 'Lengxi\'s Site',
+      profile_name: 'LengxiOωO',
     },
     nav: {
       home: 'Home',
+      home_station: 'Lengxi\'s Site',
+      home_nest: 'Lengxi\'s Nest',
       daily: 'Daily',
       projects: 'Projects',
       articles: 'Blog',
@@ -149,7 +210,6 @@ const translations = {
       about: 'About'
     },
     hero: {
-      title_suffix: "'s Space",
       scroll_down: 'Scroll Down'
     },
     profile: {
@@ -172,9 +232,9 @@ const translations = {
     stats: {
       title: 'Site Info',
       articles: 'Articles',
-      runtime: 'Runtime',
+      runtime: 'Run Days',
       visits: 'Visits',
-      days: 'Days'
+      days: ''
     },
     home: {
       welcome_title: '👋 Hi, Nice to meet you!',
@@ -189,10 +249,23 @@ const translations = {
       gallery_desc: 'Capturing the beauty of life'
     },
     projects: {
-      title: 'Projects'
+      title: 'My Projects',
+      desc: 'Open source projects synced from GitHub'
     },
     articles: {
       title: 'All Posts'
+    },
+    github_reader: {
+      loading_repos: 'Fetching projects from GitHub...',
+      select_repo: '👈 Select a project from the left',
+      no_readme: 'No README found',
+      view_source: 'Source',
+      words: 'words',
+      reading_time: 'min read',
+      license: 'License',
+      forks: 'Forks',
+      published: 'Published',
+      updated: 'Updated'
     },
     links: {
       title: 'Friend Links',
@@ -204,7 +277,7 @@ const translations = {
       intro: 'This site is built with a modern frontend stack, aiming for a balance between minimalism and aesthetics.\nBoth the code and the interface design reflect my passion for technology.',
       tech_stack: 'Tech Stack',
       features: 'Features',
-      version: 'Current Version: v2.0.0 (Refactored)'
+      version: 'Current Version: v2.1.0 (Refactored)'
     },
     settings: {
       title: 'Personalization',
@@ -257,15 +330,13 @@ const DYNAMIC_PRESETS = [
 ];
 
 const WALLPAPER_PRESETS = [
-    { name: "像素云朵", url: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?q=80&w=2670&auto=format&fit=crop" },
-    { name: "枫叶", url: "https://w.wallhaven.cc/full/gw/wallhaven-gwwkql.jpg" },
-    { name: "Miku", url: "https://w.wallhaven.cc/full/21/wallhaven-21179y.png" },
-    { name: "日系街道", url: "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?q=80&w=2694&auto=format&fit=crop" },
-    { name: "赛博朋克", url: "https://images.unsplash.com/photo-1555680202-c86f0e12f086?q=80&w=2670&auto=format&fit=crop" },
+    { name: "默认背景", url: "https://pub-5849e6e3311b4fd2ad74b7054322a4ac.r2.dev/wallpaper/my-site-wallpaper/25a4216317816d0cebf0ab3a67f18e08-tuya.jpg" },
+    { name: "涂鸦背景", url: "https://pub-5849e6e3311b4fd2ad74b7054322a4ac.r2.dev/wallpaper/my-site-wallpaper/76fcf387d44c423a12b36d875299220e-tuya.png" },
+    { name: "儿童节", url: "https://pub-5849e6e3311b4fd2ad74b7054322a4ac.r2.dev/wallpaper/my-site-wallpaper/%E5%84%BF%E7%AB%A5%E8%8A%82.png" },
+    { name: "菲米莉丝", url: "https://pub-5849e6e3311b4fd2ad74b7054322a4ac.r2.dev/wallpaper/my-site-wallpaper/%E8%8F%B2%E7%B1%B3%E8%8E%89%E4%B8%9D-tuya.png" },
 ];
 
-const AVATAR_URL = "https://github.com/LengxiQwQ/assets/blob/main/avatar/%E4%BA%8C%E6%AC%A1%E5%85%83/20230327215624_f83de.jpg?raw=true";
-const WALLPAPER_REPO_URL = "https://github.com/LengxiQwQ/assets/tree/main/wallpaper/my-site-wallpaper";
+const AVATAR_URL = "https://pub-5849e6e3311b4fd2ad74b7054322a4ac.r2.dev/avatar/20230327215624_f83de.jpg";
 
 const SOCIAL_LINKS = [
     { name: "Github", href: "https://github.com/LengxiQwQ", icon: <Github />, color: "#333" },
@@ -283,7 +354,6 @@ const galleryImages = [
     { id: 4, title: "猫咪", url: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=500&auto=format&fit=crop" },
 ];
 
-// 支持多语言的数据结构
 const projects = [
   {
     id: 1,
@@ -414,7 +484,7 @@ const Typewriter = ({ phrases, hue, darkMode }) => {
 
   return (
     <div className="font-cute text-2xl md:text-3xl h-12 flex items-center justify-center tracking-wide">
-      <span className="bg-gradient-to-r from-pink-400 via-purple-400 to-indigo-400 bg-clip-text text-transparent drop-shadow-sm pb-1">
+      <span className="bg-gradient-to-r from-pink-400 via-purple-400 to-indigo-400 bg-clip-text text-transparent drop-shadow-sm pb-1" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.2)' }}>
         {text}
       </span>
       <span className="ml-1.5 w-1.5 h-6 md:h-8 bg-pink-400 animate-pulse inline-block rounded-full"></span>
@@ -424,7 +494,8 @@ const Typewriter = ({ phrases, hue, darkMode }) => {
 
 const Hero = ({ hue, darkMode, t }) => {
   const handleScrollDown = () => {
-    const targetPosition = window.innerHeight;
+    const navbarOffset = 80;
+    const targetPosition = window.innerHeight - navbarOffset;
     window.scrollTo({
       top: targetPosition,
       behavior: 'smooth'
@@ -441,44 +512,13 @@ const Hero = ({ hue, darkMode, t }) => {
   ];
 
   return (
-    <div className={`relative h-screen w-full flex flex-col justify-center items-center text-center px-4 overflow-hidden mb-8`}>
-      <div className={`z-10 relative flex flex-col items-center animate-fade-in-up`}>
-        <h1 className={`text-5xl md:text-7xl font-black mb-4 font-comic tracking-tight drop-shadow-sm ${darkMode ? 'text-white' : 'text-gray-800'}`}>
-          {t('common.name_simple')}<span style={{ color: getThemeColor(hue, 1, 'dark') }}>{t('hero.title_suffix')}</span>
-        </h1>
+    <div className={`relative h-screen w-full flex flex-col justify-end items-center text-center px-4 overflow-hidden mb-8 pb-32`}>
+      <div className={`z-10 relative flex flex-col items-center animate-fade-in-up`}> 
         <div className="mb-10 min-h-[2rem]">
            <Typewriter phrases={typewriterPhrases} hue={hue} darkMode={darkMode} />
         </div>
-         <div className="flex flex-wrap justify-center gap-4">
-            {SOCIAL_LINKS.map((link, index) => (
-                <a 
-                  key={index}
-                  href={link.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`group w-12 h-12 flex items-center justify-center rounded-full transition-transform hover:scale-110 shadow-sm hover:shadow-md
-                    ${darkMode 
-                        ? 'bg-gray-800/40 text-gray-300 hover:text-white border border-gray-700/50' 
-                        : 'bg-white/40 text-gray-500 hover:text-white border border-white/50'
-                    }`}
-                  style={{ '--hover-bg': link.color }}
-                  onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = link.color;
-                      e.currentTarget.style.color = 'white';
-                      e.currentTarget.style.borderColor = link.color;
-                  }}
-                  onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = '';
-                      e.currentTarget.style.color = '';
-                      e.currentTarget.style.borderColor = '';
-                  }}
-                >
-                    {React.cloneElement(link.icon, { size: 20 + (link.sizeOffset || 0), strokeWidth: 2 })}
-                </a>
-            ))}
-         </div>
       </div>
-      
+       
       <div 
         className="absolute bottom-10 animate-bounce opacity-70 cursor-pointer p-4 hover:opacity-100 transition-opacity z-10" 
         onClick={handleScrollDown}
@@ -582,7 +622,7 @@ const InfoRow = ({ icon, label, value, isCopyable, hue, darkMode }) => {
     }
 
     const containerClass = `flex items-center justify-between p-2 rounded-lg transition-colors group border border-transparent 
-      ${isCopyable ? 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800' : ''}
+      ${isCopyable ? 'cursor-pointer hover:bg-gray-100 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-gray-100' : ''}
       ${!isCopyable && darkMode ? 'text-gray-400' : ''}
       ${!isCopyable && !darkMode ? 'text-gray-500' : ''}
     `;
@@ -594,11 +634,11 @@ const InfoRow = ({ icon, label, value, isCopyable, hue, darkMode }) => {
             title={isCopyable ? "点击复制" : ""}
         >
             <div className="flex items-center gap-3 overflow-hidden w-full">
-                <div className={`flex-shrink-0 w-6 flex justify-center ${isCopyable ? (darkMode ? 'text-gray-400' : 'text-gray-400') : (darkMode ? 'text-gray-500' : 'text-gray-400')} transition-colors`}>
-                   {icon}
+                <div className={`flex-shrink-0 w-6 flex justify-center ${isCopyable ? (darkMode ? 'text-gray-400 group-hover:text-gray-100' : 'text-gray-400 group-hover:text-gray-600') : (darkMode ? 'text-gray-500' : 'text-gray-400')} transition-colors`}>
+                    {icon}
                 </div>
                 <div className="flex flex-col min-w-0">
-                    <span className={`text-xs font-medium truncate leading-tight pt-0.5`}>{value}</span>
+                    <span className={`text-sm font-medium truncate leading-tight pt-0.5`}>{value}</span>
                 </div>
             </div>
             {copied && <Check size={14} className="text-green-500 flex-shrink-0 ml-2 animate-in zoom-in" />}
@@ -611,7 +651,7 @@ const SocialLink = ({ href, icon, color, hue }) => (
       href={href} 
       target="_blank" 
       rel="noopener noreferrer"
-      className="w-8 h-8 flex items-center justify-center rounded-full transition-all duration-300 hover:scale-110 shadow-sm hover:shadow-md bg-white dark:bg-gray-700 text-gray-500 hover:text-white"
+      className="w-10 h-10 flex items-center justify-center rounded-full transition-all duration-300 hover:scale-110 shadow-sm hover:shadow-md bg-white dark:bg-gray-700 text-gray-500 hover:text-white"
       style={{ '--hover-bg': color || getThemeColor(hue, 1, 'dark') }}
       onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = e.currentTarget.style.getPropertyValue('--hover-bg'); e.currentTarget.style.color = 'white'; }}
       onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = ''; e.currentTarget.style.color = ''; }}
@@ -637,13 +677,13 @@ const ProfileCardPro = ({ darkMode, hue, t }) => (
       <div className="-mt-16 mb-2 flex justify-start relative z-10">
          <div className="relative group/avatar cursor-pointer">
              <div className={`w-24 h-24 rounded-full border-[4px] p-1 transition-all duration-500 transform hover:scale-110 hover:rotate-2 ${darkMode ? 'border-gray-900 bg-gray-800 shadow-gray-900/50' : 'border-white bg-white/50 backdrop-blur shadow-gray-200'}`}>
-                <div className="w-full h-full rounded-full bg-gray-100 flex items-center justify-center overflow-hidden relative">
-                    <img src={AVATAR_URL} alt="avatar" className="w-full h-full object-cover transition-transform duration-700 group-hover/avatar:scale-110" />
-                    <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/0 to-white/30 opacity-0 group-hover/avatar:opacity-100 transition-opacity duration-500"></div>
-                </div>
+                 <div className="w-full h-full rounded-full bg-gray-100 flex items-center justify-center overflow-hidden relative">
+                     <img src={AVATAR_URL} alt="avatar" className="w-full h-full object-cover transition-transform duration-700 group-hover/avatar:scale-110" />
+                     <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/0 to-white/30 opacity-0 group-hover:avatar:opacity-100 transition-opacity duration-500"></div>
+                 </div>
              </div>
              <div className="absolute bottom-1 right-1 w-5 h-5 bg-green-500 border-[3px] border-white dark:border-gray-900 rounded-full flex items-center justify-center text-white shadow-sm" title={t('profile.online')}>
-                <Zap size={8} fill="currentColor" />
+                 <Zap size={8} fill="currentColor" />
              </div>
          </div>
       </div>
@@ -653,14 +693,14 @@ const ProfileCardPro = ({ darkMode, hue, t }) => (
               <div>
                   <div className="flex items-center gap-2 mb-1">
                       <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100">
-                        {t('common.name')}
+                        {t('common.profile_name')}
                       </h3>
                       <BadgeCheck size={18} className="text-blue-500" fill="currentColor" color="white" />
                   </div>
               </div>
               
               <button 
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all hover:scale-105 active:scale-95 shadow-sm ${darkMode ? 'bg-white text-gray-900 hover:bg-gray-100' : 'bg-gray-900 text-white hover:bg-gray-800'}`}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-bold transition-all hover:scale-105 active:scale-95 shadow-sm ${darkMode ? 'bg-white text-gray-900 hover:bg-gray-100' : 'bg-gray-900 text-white hover:bg-gray-800'}`}
               >
                   <MessageSquare size={12} />
                   {t('profile.message')}
@@ -668,7 +708,7 @@ const ProfileCardPro = ({ darkMode, hue, t }) => (
           </div>
           
           <div className="mt-3">
-              <p className={`text-xs leading-relaxed ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+              <p className={`text-sm leading-relaxed ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                   {t('profile.bio')}
               </p>
           </div>
@@ -689,11 +729,11 @@ const ProfileCardPro = ({ darkMode, hue, t }) => (
       <div className="mb-6 flex justify-center gap-3 flex-wrap">
            {SOCIAL_LINKS.map((link, i) => (
                 <SocialLink 
-                    key={i}
-                    href={link.href}
-                    icon={React.cloneElement(link.icon, { size: 16 + (link.sizeOffset || 0), strokeWidth: 2 })}
-                    color={link.color}
-                    hue={hue}
+                   key={i}
+                   href={link.href}
+                   icon={React.cloneElement(link.icon, { size: 20 + (link.sizeOffset || 0), strokeWidth: 2 })}
+                   color={link.color}
+                   hue={hue}
                 />
            ))}
       </div>
@@ -710,81 +750,51 @@ const ProfileCardPro = ({ darkMode, hue, t }) => (
   </div>
 );
 
-const StatCard = ({ darkMode, hue, t }) => (
-  <div className={`${glassCardClass(darkMode)} p-6`}>
-    <h4 className="font-bold flex items-center gap-2 mb-4 border-l-4 pl-3" style={{ borderColor: getThemeColor(hue) }}>
-      <BarChart2 size={18} /> 
-      {t('stats.title')}
-    </h4>
-    <div className="space-y-3 text-sm">
-      <div className={`flex justify-between items-center p-2 rounded-lg transition-colors ${darkMode ? 'hover:bg-gray-700/50' : 'hover:bg-white/50'}`}>
-        <span className="text-gray-400 flex items-center gap-2"><FileText size={16} className="text-blue-400"/> {t('stats.articles')}</span>
-        <span className="font-mono font-bold">6</span>
-      </div>
-      <div className={`flex justify-between items-center p-2 rounded-lg transition-colors ${darkMode ? 'hover:bg-gray-700/50' : 'hover:bg-white/50'}`}>
-        <span className="text-gray-400 flex items-center gap-2"><Clock size={16} className="text-green-400"/> {t('stats.runtime')}</span>
-        <span className="font-mono font-bold">349 {t('stats.days')}</span>
-      </div>
-      <div className={`flex justify-between items-center p-2 rounded-lg transition-colors ${darkMode ? 'hover:bg-gray-700/50' : 'hover:bg-white/50'}`}>
-        <span className="text-gray-400 flex items-center gap-2"><Heart size={16} className="text-red-400"/> {t('stats.visits')}</span>
-        <span className="font-mono font-bold">1,024</span>
+const StatCard = ({ darkMode, hue, t }) => {
+  const [runtimeDays, setRuntimeDays] = useState(0);
+  const [visitCount, setVisitCount] = useState(1024);
+
+  useEffect(() => {
+    const startDate = new Date('2025-12-15T00:00:00');
+    const now = new Date();
+    const diffTime = now - startDate;
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    setRuntimeDays(diffDays > 0 ? diffDays : 0);
+  }, []);
+
+  useEffect(() => {
+      const stored = localStorage.getItem('visitCount');
+      let count = stored ? parseInt(stored) : 1024;
+      count++;
+      localStorage.setItem('visitCount', count.toString());
+      setVisitCount(count);
+  }, []);
+
+  return (
+    <div className={`${glassCardClass(darkMode)} p-6`}>
+      <h4 className="font-bold flex items-center gap-2 mb-4 border-l-4 pl-3" style={{ borderColor: getThemeColor(hue) }}>
+        <BarChart2 size={18} /> 
+        {t('stats.title')}
+      </h4>
+      <div className="space-y-3 text-sm">
+        <div className={`flex justify-between items-center p-2 rounded-lg transition-colors ${darkMode ? 'hover:bg-gray-700/50' : 'hover:bg-white/50'}`}>
+          <span className="text-gray-400 flex items-center gap-2"><FileText size={16} className="text-blue-400"/> {t('stats.articles')}</span>
+          <span className="font-bold">6</span>
+        </div>
+        <div className={`flex justify-between items-center p-2 rounded-lg transition-colors ${darkMode ? 'hover:bg-gray-700/50' : 'hover:bg-white/50'}`}>
+          <span className="text-gray-400 flex items-center gap-2"><Clock size={16} className="text-green-400"/> {t('stats.runtime')}</span>
+          <span className="font-bold">{runtimeDays}</span>
+        </div>
+        <div className={`flex justify-between items-center p-2 rounded-lg transition-colors ${darkMode ? 'hover:bg-gray-700/50' : 'hover:bg-white/50'}`}>
+          <span className="text-gray-400 flex items-center gap-2"><Heart size={16} className="text-red-400"/> {t('stats.visits')}</span>
+          <span className="font-bold">{visitCount.toLocaleString()}</span>
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
-const ProjectList = ({ darkMode, hue, lang }) => (
-  <div className="grid grid-cols-1 gap-6">
-    {projects.map(project => (
-      <div key={project.id} className={`group ${glassCardClass(darkMode)} p-6 hover:shadow-xl transform hover:-translate-y-1`}>
-         <div className="flex flex-col gap-4">
-             <div className="flex-1 flex flex-col justify-between">
-                 <div>
-                     <div className="flex justify-between items-start mb-2">
-                         <h3 
-                            className="text-xl font-bold transition-none" 
-                            style={{ 
-                                color: 'inherit',
-                                '--hover-color': getThemeColor(hue, 1, 'dark') 
-                            }}
-                            onMouseEnter={(e) => e.currentTarget.style.color = getThemeColor(hue, 1, 'dark')}
-                            onMouseLeave={(e) => e.currentTarget.style.color = 'inherit'}
-                          >
-                            {lang === 'en' && project.title_en ? project.title_en : project.title}
-                          </h3>
-                          <div className="flex gap-2">
-                             <a href="#" className={`p-2 rounded-full transition-colors ${darkMode ? 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white' : 'bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-600'}`}>
-                                <Github size={18} />
-                             </a>
-                             <a href="#" className={`p-2 rounded-full transition-colors ${darkMode ? 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white' : 'bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-600'}`}>
-                                <ExternalLink size={18} />
-                             </a>
-                          </div>
-                     </div>
-                     <p className={`text-sm mb-4 line-clamp-2 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                        {lang === 'en' && project.desc_en ? project.desc_en : project.desc}
-                     </p>
-                 </div>
-                 
-                 <div className="flex flex-wrap items-center justify-between gap-3">
-                     <div className="flex flex-wrap gap-2">
-                        {project.tech.map(t => (
-                            <span key={t} className={`text-xs px-2.5 py-1 rounded-md font-medium ${darkMode ? 'bg-gray-800 text-gray-300 border border-gray-700' : 'bg-gray-100 text-gray-600'}`}>
-                                {t}
-                            </span>
-                        ))}
-                     </div>
-                     <div className="flex items-center gap-1 text-xs font-bold text-yellow-500">
-                         <Star size={14} fill="currentColor" /> {project.stars}
-                     </div>
-                 </div>
-             </div>
-         </div>
-      </div>
-    ))}
-  </div>
-);
-
+// --- ArticleList (恢复为静态文章列表) ---
 const ArticleList = ({ darkMode, hue, lang }) => (
   <div className="space-y-6">
     {posts.map(post => (
@@ -832,6 +842,230 @@ const ArticleList = ({ darkMode, hue, lang }) => (
   </div>
 );
 
+// --- GitHub 博客视图 (现在用于 Projects) ---
+
+const GithubBlogView = ({ darkMode, hue, t, lang }) => {
+  const GITHUB_USERNAME = 'LengxiQwQ';
+  const [repos, setRepos] = useState([]);
+  const [selectedRepo, setSelectedRepo] = useState(null);
+  const [markdownContent, setMarkdownContent] = useState('');
+  const [loadingRepos, setLoadingRepos] = useState(true);
+  const [loadingReadme, setLoadingReadme] = useState(false);
+  const [showList, setShowList] = useState(true); // 移动端控制列表显示
+  const markedLoaded = useMarked();
+
+  // 获取仓库列表
+  useEffect(() => {
+    const fetchRepos = async () => {
+      try {
+        setLoadingRepos(true);
+        const response = await fetch(`https://api.github.com/users/${GITHUB_USERNAME}/repos?sort=updated&per_page=100`);
+        if (!response.ok) throw new Error('Failed to fetch');
+        const data = await response.json();
+        // 按更新时间排序
+        const sortedData = data.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
+        setRepos(sortedData);
+        // 如果是桌面端，默认选第一个
+        if (window.innerWidth > 768 && sortedData.length > 0) {
+           handleSelectRepo(sortedData[0]);
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoadingRepos(false);
+      }
+    };
+    fetchRepos();
+  }, []);
+
+  // 选择仓库
+  const handleSelectRepo = async (repo) => {
+    setSelectedRepo(repo);
+    setLoadingReadme(true);
+    setMarkdownContent('');
+    // 移动端选择后隐藏列表
+    if (window.innerWidth < 768) setShowList(false);
+
+    try {
+      const response = await fetch(`https://api.github.com/repos/${GITHUB_USERNAME}/${repo.name}/readme`);
+      if (response.status === 404) {
+        setMarkdownContent(`# ${t('github_reader.no_readme')}\n(No README.md found)`);
+        return;
+      }
+      const data = await response.json();
+      const decodeContent = (str) => {
+        try { return decodeURIComponent(escape(window.atob(str))); } 
+        catch (e) { return window.atob(str); }
+      };
+      setMarkdownContent(decodeContent(data.content));
+    } catch (err) {
+      setMarkdownContent(`# Error\n${err.message}`);
+    } finally {
+      setLoadingReadme(false);
+    }
+  };
+
+  const getHtmlContent = () => {
+    if (!markedLoaded || !markdownContent) return '';
+    try {
+      let processed = markdownContent;
+      if (selectedRepo) {
+        const rawBaseUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${selectedRepo.name}/${selectedRepo.default_branch}/`;
+        processed = processed.replace(/!\[(.*?)\]\((?!http)(.*?)\)/g, (match, alt, url) => {
+           const cleanUrl = url.startsWith('./') ? url.slice(2) : url;
+           return `![${alt}](${rawBaseUrl}${cleanUrl})`;
+        });
+      }
+      return window.marked.parse(processed);
+    } catch (e) { return 'Error parsing markdown'; }
+  };
+
+  // 辅助函数：估算阅读时间
+  const getReadingStats = (content) => {
+      if (!content) return { words: 0, time: 0 };
+      const words = content.length; // 简单按字符数计算
+      const time = Math.ceil(words / 500); // 假设阅读速度 500字/分钟
+      return { words, time };
+  };
+
+  const stats = getReadingStats(markdownContent);
+
+  return (
+    <div className="flex flex-col animate-fade-in-content relative min-h-screen">
+      {/* 顶部标题区 (仅移动端显示，桌面端隐藏在列表头) */}
+      <div className="md:hidden flex-none mb-4 flex items-center justify-between">
+          <h2 className="text-xl font-bold flex items-center gap-2">
+             <Code className="text-blue-500" /> {t('projects.title')}
+          </h2>
+          <button 
+             className="px-3 py-1 bg-blue-500 text-white rounded-full text-sm shadow-sm"
+             onClick={() => setShowList(!showList)}
+          >
+             {showList ? t('github_reader.view_source') : 'List'}
+          </button>
+      </div>
+
+      <div className="flex flex-col md:flex-row gap-6 items-start">
+         {/* 左侧列表 (Sticky Layout) */}
+         <div className={`
+             ${showList ? 'block' : 'hidden'} md:block
+             w-full md:w-1/3 lg:w-1/4 
+             sticky md:top-24
+             flex-shrink-0
+             transition-all duration-300
+         `}>
+             <div className={`${glassCardClass(darkMode)} overflow-hidden flex flex-col max-h-[calc(100vh-8rem)]`}>
+                <div className={`p-4 border-b ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+                    <h3 className="font-bold flex items-center gap-2"><FolderGit2 size={18}/> {t('projects.title')} <span className="text-xs opacity-50 bg-gray-200 dark:bg-gray-700 px-1.5 rounded-full">{repos.length}</span></h3>
+                </div>
+                <div className="flex-1 overflow-y-auto p-2 space-y-2 custom-scrollbar">
+                    {loadingRepos ? (
+                        <div className="flex justify-center p-8"><Loader2 className="animate-spin text-gray-400" /></div>
+                    ) : (
+                        repos.map(repo => (
+                            <button
+                                key={repo.id}
+                                onClick={() => handleSelectRepo(repo)}
+                                className={`w-full text-left p-3 rounded-xl transition-all group relative ${
+                                    selectedRepo?.id === repo.id 
+                                    ? (darkMode ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30 shadow-sm' : 'bg-blue-50 text-blue-600 border border-blue-200 shadow-sm')
+                                    : (darkMode ? 'hover:bg-gray-800 text-gray-400 border border-transparent' : 'hover:bg-gray-100 text-gray-600 border border-transparent')
+                                }`}
+                            >
+                                {/* 标题 (Repo Name) */}
+                                <div className="font-bold text-sm mb-1 truncate pr-2 flex items-center justify-between">
+                                    <span>{repo.name}</span>
+                                    {repo.private && <span className="text-[10px] border border-gray-500 px-1 rounded">Private</span>}
+                                </div>
+                                
+                                {/* 描述 (2行预览) */}
+                                <p className={`text-xs leading-relaxed line-clamp-2 mb-2 ${darkMode ? 'text-gray-500' : 'text-gray-500'}`} title={repo.description}>
+                                    {repo.description || 'No description provided.'}
+                                </p>
+
+                                {/* 底部元数据: License, Star, Forks */}
+                                <div className="flex items-center gap-3 text-[10px] opacity-70">
+                                    {repo.license && (
+                                        <span className="flex items-center gap-1" title="License"><Scale size={10}/> {repo.license.spdx_id || 'LIC'}</span>
+                                    )}
+                                    <span className="flex items-center gap-1"><Star size={10} className={repo.stargazers_count > 0 ? "text-yellow-500 fill-yellow-500" : ""}/> {repo.stargazers_count}</span>
+                                    <span className="flex items-center gap-1"><GitFork size={10}/> {repo.forks_count}</span>
+                                </div>
+                            </button>
+                        ))
+                    )}
+                </div>
+             </div>
+         </div>
+
+         {/* 右侧内容 (自适应高度) */}
+         <div className={`
+             flex-1 w-full min-w-0
+             ${glassCardClass(darkMode)} 
+             flex flex-col relative min-h-[500px]
+         `}>
+             {loadingReadme ? (
+                 <div className="flex-1 flex flex-col items-center justify-center text-gray-400 gap-4 py-20">
+                     <Loader2 className="animate-spin text-blue-500" size={40} />
+                     <span className="text-sm font-medium animate-pulse">{t('github_reader.loading_repos')}</span>
+                 </div>
+             ) : !selectedRepo ? (
+                 <div className="flex-1 flex flex-col items-center justify-center text-gray-400 gap-4 opacity-50 py-20">
+                     <BookOpen size={64} strokeWidth={1} />
+                     <p className="text-lg">{t('github_reader.select_repo')}</p>
+                 </div>
+             ) : (
+                 <div className="p-6 md:p-10">
+                     {/* 文章头部信息区 */}
+                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-4 border-b border-gray-200/50 dark:border-gray-700/50">
+                         {/* 整合的元数据行：时间 + 统计信息 (左对齐) */}
+                         <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-gray-500 dark:text-gray-400">
+                             <span className="flex items-center gap-1.5" title="Published">
+                                 <Calendar size={14} className="text-blue-500"/> {t('github_reader.published')}: {new Date(selectedRepo.created_at).toLocaleDateString()}
+                             </span>
+                             <span className="flex items-center gap-1.5" title="Updated">
+                                 <Clock size={14} className="text-orange-500"/> {t('github_reader.updated')}: {new Date(selectedRepo.updated_at).toLocaleDateString()}
+                             </span>
+                             <span className="flex items-center gap-1.5" title="Word Count">
+                                 <FileText size={14} className="text-indigo-500"/> {stats.words} {t('github_reader.words')}
+                             </span>
+                             <span className="flex items-center gap-1.5" title="Reading Time">
+                                 <Timer size={14} className="text-green-500"/> {stats.time} {t('github_reader.reading_time')}
+                             </span>
+                             <span className="flex items-center gap-1.5 hidden sm:flex" title="Default Branch">
+                                 <GitBranch size={14} className="text-purple-500"/> {selectedRepo.default_branch}
+                             </span>
+                         </div>
+
+                         {/* 顶部工具栏：源码链接在右侧 (右对齐) */}
+                         <a 
+                            href={selectedRepo.html_url} 
+                            target="_blank" 
+                            rel="noreferrer"
+                            className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold transition-all hover:-translate-y-0.5 shadow-sm opacity-80 hover:opacity-100 ${darkMode ? 'bg-gray-800 hover:bg-gray-700 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'}`}
+                         >
+                            <Github size={14}/> {t('github_reader.view_source')}
+                         </a>
+                     </div>
+
+                     {/* Markdown 内容 (第一行会自动作为标题显示) */}
+                     <div 
+                        className={`markdown-body ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}
+                        dangerouslySetInnerHTML={{ __html: getHtmlContent() }}
+                     />
+                     
+                     {/* 底部结束符 */}
+                     <div className="mt-16 pt-8 border-t border-dashed border-gray-200 dark:border-gray-800 text-center">
+                        <div className="text-2xl text-gray-300 dark:text-gray-700 font-serif italic">~ EOF ~</div>
+                     </div>
+                 </div>
+             )}
+         </div>
+      </div>
+    </div>
+  );
+};
+
 const GalleryGrid = ({ darkMode, hue, t }) => (
     <div className="grid grid-cols-2 gap-4">
         {galleryImages.map((img, i) => (
@@ -867,44 +1101,22 @@ const Navbar = ({
   const [showColorPicker, setShowColorPicker] = useState(false);
   const pickerRef = useRef(null);
 
+  const handleNavClick = (viewId) => {
+    setCurrentView(viewId);
+    window.scrollTo({ top: 0, behavior: 'smooth' }); // 核心修改：切换页面时回到顶部
+    setIsMenuOpen(false);
+  };
+
   // 导航项配置
+  // 删除了 home 的 hasDropdown: true
   const navItems = [
       { id: 'home', icon: <Home size={18}/>, label: t('nav.home') },
       { id: 'daily', icon: <Coffee size={18}/>, label: t('nav.daily') }, 
       { id: 'projects', icon: <Code size={18}/>, label: t('nav.projects') },
-      { id: 'articles', icon: <Book size={18}/>, label: t('nav.articles') },
+      { id: 'articles', icon: <BookOpen size={18}/>, label: t('nav.articles') },
       { id: 'links', icon: <LinkIcon size={18}/>, label: t('nav.links') },
       { id: 'about', icon: <User size={18}/>, label: t('nav.about') },
   ];
-
-  const [githubWallpapers, setGithubWallpapers] = useState([]);
-  const [loadingWallpapers, setLoadingWallpapers] = useState(false);
-  const [visibleCount, setVisibleCount] = useState(12);
-
-  useEffect(() => {
-    const fetchGithubWallpapers = async () => {
-        setLoadingWallpapers(true);
-        try {
-            const response = await fetch('https://api.github.com/repos/LengxiQwQ/assets/git/trees/main?recursive=1');
-            if (response.ok) {
-                const data = await response.json();
-                if (data.tree) {
-                    const images = data.tree
-                        .filter(item => item.path.startsWith('wallpaper/my-site-wallpaper/') && /\.(jpg|jpeg|png|gif|webp)$/i.test(item.path))
-                        .map(item => ({
-                            name: item.path.split('/').pop(), 
-                            url: `https://cdn.jsdelivr.net/gh/LengxiQwQ/assets@main/${item.path}`,
-                            path: item.path
-                        }));
-                    setGithubWallpapers(images);
-                }
-            }
-        } catch (error) { console.error(error); } finally { setLoadingWallpapers(false); }
-    };
-    fetchGithubWallpapers();
-  }, []);
-
-  const handleLoadMore = (e) => { e.stopPropagation(); setVisibleCount(prev => prev + 12); };
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -916,9 +1128,6 @@ const Navbar = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const displayedGithubWallpapers = githubWallpapers.slice(0, visibleCount);
-
-  // 切换语言
   const toggleLanguage = () => {
       setLang(lang === 'zh' ? 'en' : 'zh');
   };
@@ -927,13 +1136,44 @@ const Navbar = ({
     <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${darkMode ? 'bg-gray-900/60 border-gray-800/50' : 'bg-white/60 border-white/50'} backdrop-blur-md border-b`}>
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <div className="flex-shrink-0 flex items-center gap-3 cursor-pointer group" onClick={() => setCurrentView('home')}>
-            <div className="relative w-10 h-10 rounded-full p-[2px]" style={{ background: 'conic-gradient(from 0deg, #4285F4 0deg 110deg, #EA4335 110deg 240deg, #FBBC05 240deg 300deg, #34A853 300deg 360deg)' }}>
-                <div className={`w-full h-full rounded-full overflow-hidden ${darkMode ? 'bg-gray-900' : 'bg-white'} p-[1.5px] group-hover:rotate-[360deg] transition-transform duration-700`}>
-                    <img src={AVATAR_URL} alt="Logo" className="w-full h-full object-cover rounded-full" />
-                </div>
-            </div>
-            <span className={`font-bold text-xl tracking-wide font-comic ${darkMode ? 'text-white' : 'text-gray-800'}`}>{t('common.name')}</span>
+          {/* 左侧区域：头像 + 品牌下拉菜单 */}
+          <div className="flex-shrink-0 flex items-center gap-3">
+             {/* 头像：点击回首页 */}
+             <a href="https://lengxi.xyz" className="cursor-pointer group relative">
+                 <div className="relative w-10 h-10 rounded-full p-[2px]" style={{ background: 'conic-gradient(from 0deg, #4285F4 0deg 110deg, #EA4335 110deg 240deg, #FBBC05 240deg 300deg, #34A853 300deg 360deg)' }}>
+                    <div className={`w-full h-full rounded-full overflow-hidden ${darkMode ? 'bg-gray-900' : 'bg-white'} p-[1.5px] transition-transform duration-700 group-hover:scale-105`}>
+                        <img src={AVATAR_URL} alt="Logo" className="w-full h-full object-cover rounded-full" />
+                    </div>
+                 </div>
+             </a>
+             
+             {/* 品牌名称：带有下拉菜单 */}
+             <div className="relative group cursor-pointer h-16 flex items-center">
+                 <span className={`font-bold text-xl tracking-wide font-comic ${darkMode ? 'text-white' : 'text-gray-800'}`}>
+                    {t('common.name')}
+                 </span>
+                 <ChevronDown size={16} className={`ml-1 opacity-50 group-hover:opacity-100 transition-opacity ${darkMode ? 'text-white' : 'text-gray-800'}`}/>
+                 
+                 {/* 下拉菜单内容 */}
+                 <div className="absolute top-12 left-0 pt-2 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top-left z-50">
+                     <div className={`rounded-xl shadow-lg overflow-hidden border p-1 backdrop-blur-xl ${darkMode ? 'bg-gray-800/90 border-gray-700' : 'bg-white/90 border-gray-200'}`}>
+                         <button 
+                             onClick={() => handleNavClick('home')}
+                             className={`w-full text-left px-4 py-3 rounded-lg text-sm transition-colors flex justify-between items-center ${darkMode ? 'hover:bg-white/10 text-gray-200' : 'hover:bg-gray-100 text-gray-700'}`}
+                         >
+                             {t('nav.home_station')}
+                             {currentView === 'home' && <Check size={14} className="text-blue-500" />}
+                         </button>
+                         <button 
+                             onClick={() => handleNavClick('daily')}
+                             className={`w-full text-left px-4 py-3 rounded-lg text-sm transition-colors flex justify-between items-center ${darkMode ? 'hover:bg-white/10 text-gray-200' : 'hover:bg-gray-100 text-gray-700'}`}
+                         >
+                             {t('nav.home_nest')}
+                             {currentView === 'daily' && <Check size={14} className="text-blue-500" />}
+                         </button>
+                     </div>
+                 </div>
+             </div>
           </div>
 
           {/* Desktop Nav */}
@@ -941,18 +1181,15 @@ const Navbar = ({
             {navItems.map((item) => (
                 <button
                     key={item.id}
-                    onClick={() => setCurrentView(item.id)}
-                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 flex items-center gap-2 relative group
-                        ${currentView === item.id 
-                            ? (darkMode ? 'text-white bg-white/10' : 'text-gray-900 bg-gray-100')
-                            : 'hover:bg-black/5 dark:hover:bg-white/5'
-                        }
-                    `}
+                    onClick={() => handleNavClick(item.id)}
+                    className={`px-4 py-2 rounded-full text-base font-medium transition-all duration-300 flex items-center gap-2 relative group hover:bg-black/5 dark:hover:bg-white/5`}
                 >
                     <span className={`transition-colors ${currentView === item.id ? 'text-blue-500' : 'text-gray-400 group-hover:text-gray-500'}`}>
                         {item.icon}
                     </span>
-                    {item.label}
+                    <span className={`${currentView === item.id ? (darkMode ? 'text-white' : 'text-gray-900') : ''}`}>
+                        {item.label}
+                    </span>
                 </button>
             ))}
           </div>
@@ -960,7 +1197,6 @@ const Navbar = ({
           {/* 右侧功能区（桌面 + 移动端通用） */}
           <div className="flex items-center gap-2">
             <div className={`flex items-center space-x-1 ${darkMode ? 'text-gray-200' : 'text-gray-600'}`}>
-                {/* 中英文切换按钮 */}
                 <button 
                     onClick={toggleLanguage}
                     className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 relative group transition-colors"
@@ -969,7 +1205,6 @@ const Navbar = ({
                     <Languages size={20} />
                 </button>
 
-                {/* 设置/主题按钮 */}
                 <div className="relative" ref={pickerRef}>
                   <button 
                     onClick={() => setShowColorPicker(!showColorPicker)}
@@ -1004,50 +1239,35 @@ const Navbar = ({
                           <span className="text-xs font-semibold text-gray-500 flex items-center gap-1 mb-3"><Sparkles size={12}/> {t('settings.dynamic_bg')}</span>
                           <div className="grid grid-cols-2 gap-3 mb-5">
                               {DYNAMIC_PRESETS.map((bg, idx) => (
-                                  <div key={idx} onClick={() => setBgConfig({...bgConfig, url: bg.url})} className={`h-16 rounded-xl cursor-pointer overflow-hidden border-2 relative group transition-all ${bgConfig.url === bg.url ? 'border-blue-500 shadow-md scale-[1.02]' : 'border-transparent hover:border-gray-200 dark:hover:border-gray-600'}`}>    
-                                            {bg.url === 'default' ? (
-                                                <div className="w-full h-full bg-gradient-to-br from-pink-50 to-blue-50 dark:from-gray-700 dark:to-gray-600 flex flex-col items-center justify-center relative overflow-hidden">
-                                                    <div className="absolute top-[-20%] left-[-20%] w-[80%] h-[80%] rounded-full bg-blue-400/20 blur-md"></div>
-                                                    <div className="absolute bottom-[-20%] right-[-20%] w-[80%] h-[80%] rounded-full bg-pink-400/20 blur-md"></div>
-                                                    <span className="text-[10px] text-gray-600 dark:text-gray-300 font-bold relative z-10">{bg.name}</span>
-                                                </div>
-                                              ) : (
-                                                <div className="w-full h-full bg-black flex flex-col items-center justify-center relative overflow-hidden">
-                                                    <div className="absolute w-full h-full bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 opacity-80"></div>
-                                                    <span className="text-[10px] text-white font-bold relative z-10 drop-shadow-md">{bg.name}</span>
-                                                </div>
-                                              )}
-                                              {bgConfig.url === bg.url && (<div className="absolute bottom-1.5 right-1.5 bg-blue-500 rounded-full p-[2px] shadow-sm flex items-center justify-center"><Check size={8} className="text-white" strokeWidth={3} /></div>)}
+                                  <div key={idx} onClick={() => setBgConfig({...bgConfig, url: bg.url})} className={`h-16 rounded-xl cursor-pointer overflow-hidden border-2 relative group transition-all ${bgConfig.url === bg.url ? 'border-blue-500 shadow-md scale-[1.02]' : 'border-transparent hover:border-gray-200 dark:hover:border-gray-600'}`}>      
+                                                      {bg.url === 'default' ? (
+                                                          <div className="w-full h-full bg-gradient-to-br from-pink-50 to-blue-50 dark:from-gray-700 dark:to-gray-600 flex flex-col items-center justify-center relative overflow-hidden">
+                                                              <div className="absolute top-[-20%] left-[-20%] w-[80%] h-[80%] rounded-full bg-blue-400/20 blur-md"></div>
+                                                              <div className="absolute bottom-[-20%] right-[-20%] w-[80%] h-[80%] rounded-full bg-pink-400/20 blur-md"></div>
+                                                              <span className="text-[10px] text-gray-600 dark:text-gray-300 font-bold relative z-10">{bg.name}</span>
+                                                          </div>
+                                                        ) : (
+                                                          <div className="w-full h-full bg-black flex flex-col items-center justify-center relative overflow-hidden">
+                                                              <div className="absolute w-full h-full bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 opacity-80"></div>
+                                                              <span className="text-[10px] text-white font-bold relative z-10 drop-shadow-md">{bg.name}</span>
+                                                          </div>
+                                                        )}
+                                                      {bgConfig.url === bg.url && (<div className="absolute bottom-1.5 right-1.5 bg-blue-500 rounded-full p-[2px] shadow-sm flex items-center justify-center"><Check size={8} className="text-white" strokeWidth={3} /></div>)}
                                   </div>
                               ))}
                           </div>
                           <span className="text-xs font-semibold text-gray-500 flex items-center gap-1 mb-3"><ImageIcon size={12}/> {t('settings.wallpaper')}</span>
                           <div className="grid grid-cols-3 gap-2 mb-4">
                               {WALLPAPER_PRESETS.map((bg, idx) => (
-                                  <div key={idx} onClick={() => setBgConfig({...bgConfig, url: bg.url})} className={`aspect-video rounded-lg cursor-pointer overflow-hidden border-2 relative group transition-all ${bgConfig.url === bg.url ? 'border-blue-500' : 'border-transparent hover:border-gray-200 dark:hover:border-gray-600'}`} title={bg.name}>    
+                                  <div key={idx} onClick={() => setBgConfig({...bgConfig, url: bg.url})} className={`aspect-video rounded-lg cursor-pointer overflow-hidden border-2 relative group transition-all ${bgConfig.url === bg.url ? 'border-blue-500' : 'border-transparent hover:border-gray-200 dark:hover:border-gray-600'}`}>      
                                           <img src={bg.url} alt={bg.name} className="w-full h-full object-cover" loading="lazy" />
                                           {bgConfig.url === bg.url && (<div className="absolute bottom-1 right-1 bg-blue-500 rounded-full p-[2px] shadow-sm flex items-center justify-center"><Check size={8} className="text-white" strokeWidth={3} /></div>)}
                                   </div>
                               ))}
                           </div>
-                          <div className="flex justify-between items-center mb-3">
-                              <span className="text-xs font-semibold text-gray-500 flex items-center gap-1"><FolderGit2 size={12}/> {t('settings.github_wallpaper')}</span>
-                              {loadingWallpapers && (<span className="text-[10px] text-gray-400 animate-pulse flex items-center gap-1"><Loader2 size={10} className="animate-spin"/> {t('settings.loading')}</span>)}
-                          </div>
-                          <div className="grid grid-cols-3 gap-2 mb-2">
-                              {displayedGithubWallpapers.length > 0 && displayedGithubWallpapers.map((bg, idx) => (
-                                  <div key={idx} onClick={() => setBgConfig({...bgConfig, url: bg.url})} className={`aspect-video rounded-lg cursor-pointer overflow-hidden border-2 relative group transition-all ${bgConfig.url === bg.url ? 'border-blue-500' : 'border-transparent hover:border-gray-200 dark:hover:border-gray-600'}`} title={bg.name}>    
-                                          <img src={bg.url} alt={bg.name} className="w-full h-full object-cover" loading="lazy" />
-                                          {bgConfig.url === bg.url && (<div className="absolute bottom-1 right-1 bg-blue-500 rounded-full p-[2px] shadow-sm flex items-center justify-center"><Check size={8} className="text-white" strokeWidth={3} /></div>)}
-                                  </div>
-                              ))}
-                          </div>
-                          {githubWallpapers.length > visibleCount && (
-                              <div className="flex justify-center mb-4"><button onClick={handleLoadMore} className="text-[10px] text-gray-500 hover:text-blue-500 flex items-center gap-1 bg-gray-100 dark:bg-gray-800 px-3 py-1.5 rounded-full transition-colors"><Plus size={10} /> {t('settings.loading')} ({githubWallpapers.length - visibleCount})</button></div>
-                          )}
                           <div className="mb-4">
                                 <label className="text-[10px] text-gray-400 mb-1 block flex items-center gap-1"><LinkIcon size={10}/> {t('settings.custom_link')}</label>
-                                <input type="text" value={bgConfig.url !== 'default' && bgConfig.url !== 'siri' && !WALLPAPER_PRESETS.find(p => p.url === bgConfig.url) && !githubWallpapers.find(p => p.url === bgConfig.url) ? bgConfig.url : ''} onChange={(e) => setBgConfig({...bgConfig, url: e.target.value})} placeholder="https://example.com/image.jpg" className="w-full text-xs p-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400/50 transition-shadow"/>
+                                <input type="text" value={bgConfig.url !== 'default' && bgConfig.url !== 'siri' && !WALLPAPER_PRESETS.find(p => p.url === bgConfig.url) ? bgConfig.url : ''} onChange={(e) => setBgConfig({...bgConfig, url: e.target.value})} placeholder="https://example.com/image.jpg" className="w-full text-xs p-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400/50 transition-shadow"/>
                           </div>
                           <div className="mb-3">
                               <div className="flex justify-between text-[10px] text-gray-400 mb-1"><span>{t('settings.blur')}</span><span>{bgConfig.blur}px</span></div>
@@ -1062,7 +1282,6 @@ const Navbar = ({
                   )}
                 </div>
 
-                {/* 深色模式按钮 */}
                 <button onClick={toggleDarkMode} className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
                   {darkMode ? <Sun size={20} /> : <Moon size={20} />}
                 </button>
@@ -1084,12 +1303,15 @@ const Navbar = ({
                {navItems.map((item) => (
                     <button
                         key={item.id}
-                        onClick={() => { setCurrentView(item.id); setIsMenuOpen(false); }}
+                        onClick={() => handleNavClick(item.id)}
                         className={`p-3 rounded-lg text-left flex items-center gap-3 transition-colors ${currentView === item.id ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white/5'}`}
                     >
                         {item.icon} {item.label}
                     </button>
                ))}
+               <div className="border-t my-2 border-gray-200 dark:border-gray-700"></div>
+               <button onClick={() => handleNavClick('home')} className="p-3 text-sm text-gray-500 flex justify-between">冷汐的小站 {currentView === 'home' && <Check size={14}/>}</button>
+               <button onClick={() => handleNavClick('daily')} className="p-3 text-sm text-gray-500 flex justify-between">冷汐的小窝 {currentView === 'daily' && <Check size={14}/>}</button>
           </div>
       )}
     </nav>
@@ -1154,7 +1376,7 @@ const HomeView = ({ hue, darkMode, t, lang }) => (
     </div>
 );
 
-// 2. 日常视图 (DailyView) - 仅保留美好瞬间 (Gallery)
+// 2. 日常视图 (DailyView)
 const DailyView = ({ hue, darkMode, t }) => (
     <div className="flex flex-col gap-8 animate-fade-in-content">
         <div className="flex items-center gap-3">
@@ -1197,7 +1419,7 @@ const LinksView = ({ hue, darkMode, t }) => (
     </div>
 );
 
-// 4. 关于视图 (AboutView) - 重构为技术栈展示
+// 4. 关于视图 (AboutView)
 const AboutView = ({ hue, darkMode, t }) => (
     <div className="max-w-4xl mx-auto animate-fade-in-content">
         <div className={`${glassCardClass(darkMode)} p-8 md:p-12`}>
@@ -1269,8 +1491,8 @@ export default function App() {
   const [bgConfig, setBgConfig] = useState(() => {
     try {
       const saved = localStorage.getItem('bgConfig');
-      return saved ? JSON.parse(saved) : { url: "default", blur: 0, opacity: 0.5 };
-    } catch (e) { return { url: "default", blur: 0, opacity: 0.5 }; }
+      return saved ? JSON.parse(saved) : { url: WALLPAPER_PRESETS[0].url, blur: 3, opacity: 0.35 };
+    } catch (e) { return { url: WALLPAPER_PRESETS[0].url, blur: 3, opacity: 0.35 }; }
   });
 
   // 语言状态
@@ -1305,8 +1527,8 @@ export default function App() {
       switch(currentView) {
           case 'home': return <HomeView hue={hue} darkMode={darkMode} t={t} lang={lang} />;
           case 'daily': return <DailyView hue={hue} darkMode={darkMode} t={t} />;
-          case 'projects': return <div className="animate-fade-in-content"><h2 className="text-2xl font-bold mb-6 flex items-center gap-2"><Code/> {t('projects.title')}</h2><ProjectList darkMode={darkMode} hue={hue} lang={lang} /></div>;
-          case 'articles': return <div className="animate-fade-in-content"><h2 className="text-2xl font-bold mb-6 flex items-center gap-2"><Book/> {t('articles.title')}</h2><ArticleList darkMode={darkMode} hue={hue} lang={lang} /></div>;
+          case 'projects': return <GithubBlogView darkMode={darkMode} hue={hue} t={t} lang={lang} />; // 核心替换：Github 阅读器放这里
+          case 'articles': return <div className="animate-fade-in-content"><h2 className="text-2xl font-bold mb-6 flex items-center gap-2"><Book/> {t('articles.title')}</h2><ArticleList darkMode={darkMode} hue={hue} lang={lang} /></div>; // 恢复静态文章列表
           case 'links': return <LinksView hue={hue} darkMode={darkMode} t={t} />;
           case 'about': return <AboutView hue={hue} darkMode={darkMode} t={t} />;
           default: return <HomeView hue={hue} darkMode={darkMode} t={t} lang={lang} />;
@@ -1315,7 +1537,7 @@ export default function App() {
 
   return (
     <div className={`min-h-screen transition-colors duration-300 font-sans selection:bg-pink-200 selection:text-pink-900 ${darkMode ? 'bg-gray-900' : 'bg-[#fdfbf8]'} relative`}>
-      <GlobalStyles />
+      <GlobalStyles hue={hue} darkMode={darkMode} />
 
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
         {bgConfig.url === 'default' ? (
@@ -1353,7 +1575,7 @@ export default function App() {
         setLang={setLang}
         t={t}
       />
-      
+       
       {currentView === 'home' && <Hero hue={hue} darkMode={darkMode} t={t} />}
 
       <main className={`max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 pb-20 relative z-20 min-h-[60vh] ${currentView === 'home' ? '' : 'pt-24'}`}>
