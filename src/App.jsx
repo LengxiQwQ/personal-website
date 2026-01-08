@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { 
   Moon, Sun, Menu, Search, Github, Youtube, 
   MessageCircle, Home, Book, Link as LinkIcon, User, 
@@ -8,10 +8,10 @@ import {
   Zap, Mail, Copy, Check, Instagram, Gamepad2, ExternalLink, Star, 
   Settings, Sliders, Image as ImgIcon, Upload, Sparkles, Layout, Cloud, FolderGit2, Loader2, Plus,
   Quote, Code, Terminal, BadgeCheck, MessageSquare, Camera, Link2, Smile, Layers, Monitor, Paintbrush, Globe, Languages,
-  BookOpen, GitBranch, Eye, GitFork, Scale, Timer
+  BookOpen, GitBranch, Eye, GitFork, Scale, Timer, AlertTriangle
 } from 'lucide-react';
 
-// --- Hook: 动态加载 marked.js (用于解析 Markdown) ---
+// --- Hook: Load marked.js dynamically ---
 const useMarked = () => {
   const [loaded, setLoaded] = useState(false);
   useEffect(() => {
@@ -27,18 +27,17 @@ const useMarked = () => {
   return loaded;
 };
 
-// --- 全局样式组件 ---
+// --- Global Styles ---
 const GlobalStyles = ({ hue, darkMode }) => (
   <style>{`
-    @import url('https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap');
-    @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap');
     
-    body {
-      font-family: 'PingFang SC', 'Microsoft YaHei', 'Nunito', sans-serif;
+    html {
+      scrollbar-gutter: stable;
     }
 
-    .font-cute {
-      font-family: 'ZCOOL KuaiLe', 'PingFang SC', cursive;
+    body {
+      font-family: 'Nunito', 'PingFang SC', 'Microsoft YaHei', sans-serif;
     }
     
     @keyframes fadeIn {
@@ -65,8 +64,7 @@ const GlobalStyles = ({ hue, darkMode }) => (
       100% { transform: translate(0px, 0px) scale(1); }
     }
 
-    /* --- Markdown 自定义样式 (适配阅读器) --- */
-    /* H1 作为文章标题，稍微加大间距 */
+    /* --- Markdown Styles --- */
     .markdown-body h1 { font-size: 2.2em; font-weight: 800; margin-bottom: 0.8em; border-bottom: none; line-height: 1.2; margin-top: 0; }
     .markdown-body h2 { font-size: 1.5em; font-weight: bold; margin-bottom: 0.5em; margin-top: 1.5em; padding-bottom: 0.3em; border-bottom: 1px solid rgba(128,128,128,0.1); }
     .markdown-body h3 { font-size: 1.25em; font-weight: bold; margin-bottom: 0.5em; margin-top: 1.2em; }
@@ -83,7 +81,7 @@ const GlobalStyles = ({ hue, darkMode }) => (
     .markdown-body img { max-width: 100%; border-radius: 0.8em; margin: 1.5em auto; display: block; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
     .markdown-body hr { height: 1px; background-color: rgba(128,128,128,0.2); border: none; margin: 3em 0; }
     
-    /* 滚动条样式 */
+    /* Scrollbar */
     .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
     .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(156, 163, 175, 0.5); border-radius: 3px; }
@@ -91,17 +89,17 @@ const GlobalStyles = ({ hue, darkMode }) => (
   `}</style>
 );
 
-// --- 翻译字典 ---
+// --- Translation Dictionary ---
 const translations = {
   zh: {
     common: {
       name: '冷汐的小站',
-      profile_name: '冷汐OωO', // 专门用于个人资料的名字
+      profile_name: '冷汐OωO',
     },
     nav: {
       home: '首页',
       home_station: '冷汐的小站',
-      home_nest: '冷汐的小窝',
+      home_nest: '冷汐的次元小窝',
       daily: '日常',
       projects: '项目',
       articles: '文章',
@@ -164,7 +162,9 @@ const translations = {
       license: '协议',
       forks: 'Forks',
       published: '发布于',
-      updated: '更新于'
+      updated: '更新于',
+      rate_limit: 'API 请求次数超限',
+      rate_limit_desc: 'GitHub API 访问受限。请稍后再试。'
     },
     links: {
       title: '友情链接',
@@ -176,7 +176,7 @@ const translations = {
       intro: '本站是一个基于现代前端技术栈构建的个人展示空间。设计上追求极简与美观的平衡，交互上注重流畅与响应式体验。\n无论是代码的编写还是界面的打磨，都倾注了对技术的热爱。',
       tech_stack: '技术栈',
       features: '设计特性',
-      version: '当前版本：v2.1.0 (Refactored)'
+      version: '当前版本：v2.5.0 (Polished)'
     },
     settings: {
       title: '个性化设置',
@@ -202,7 +202,7 @@ const translations = {
     nav: {
       home: 'Home',
       home_station: 'Lengxi\'s Site',
-      home_nest: 'Lengxi\'s Nest',
+      home_nest: 'Lengxi\'s Dimensional Nest',
       daily: 'Daily',
       projects: 'Projects',
       articles: 'Blog',
@@ -265,7 +265,9 @@ const translations = {
       license: 'License',
       forks: 'Forks',
       published: 'Published',
-      updated: 'Updated'
+      updated: 'Updated',
+      rate_limit: 'API Rate Limit Exceeded',
+      rate_limit_desc: 'GitHub API access limited. Please try again later.'
     },
     links: {
       title: 'Friend Links',
@@ -277,7 +279,7 @@ const translations = {
       intro: 'This site is built with a modern frontend stack, aiming for a balance between minimalism and aesthetics.\nBoth the code and the interface design reflect my passion for technology.',
       tech_stack: 'Tech Stack',
       features: 'Features',
-      version: 'Current Version: v2.1.0 (Refactored)'
+      version: 'Current Version: v2.5.0 (Polished)'
     },
     settings: {
       title: 'Personalization',
@@ -297,7 +299,7 @@ const translations = {
   }
 };
 
-// --- 图标组件 (保持不变) ---
+// --- Icon Components ---
 const BilibiliIcon = ({ size = 20, className }) => (
   <svg width={size} height={size} viewBox="0 0 1024 1024" version="1.1" fill="currentColor" className={className}>
     <path d="M306.005333 117.632L444.330667 256h135.296l138.368-138.325333a42.666667 42.666667 0 1 1 60.373333 60.373333l-78.037333 77.952L789.333333 256A149.333333 149.333333 0 0 1 938.666667 405.333333v341.333334a149.333333 149.333333 0 0 1-149.333334 149.333333h-554.666666A149.333333 149.333333 0 0 1 85.333333 746.666667v-341.333334A149.333333 149.333333 0 0 1 234.666667 256h88.96L245.632 177.962667a42.666667 42.666667 0 0 1 60.373333-60.373334zM789.333333 341.333333h-554.666666a64 64 0 0 0-63.701334 57.856L170.666667 405.333333v341.333334a64 64 0 0 0 57.856 63.701333L234.666667 810.666667h554.666666a64 64 0 0 0 63.701334-57.813334L853.333333 746.666667v-341.333334A64 64 0 0 0 789.333333 341.333333zM341.333333 469.333333a42.666667 42.666667 0 0 1 42.666667 42.666667v85.333333a42.666667 42.666667 0 1 1-85.333333 0v-85.333333a42.666667 42.666667 0 0 1 42.666666-42.666667z m341.333334 0a42.666667 42.666667 0 0 1 42.666666 42.666667v85.333333a42.666667 42.666667 0 1 1-85.333333 0v-85.333333a42.666667 42.666667 0 0 1 42.666667-42.666667z" p-id="8619"></path>
@@ -322,8 +324,7 @@ const QQIcon = ({ size = 20, className }) => (
   </svg>
 );
 
-// --- 数据 ---
-
+// --- Data ---
 const DYNAMIC_PRESETS = [
     { name: "默认光斑", url: "default", desc: "柔和律动" },
     { name: "炫彩流光", url: "siri", desc: "深色极光" },
@@ -352,45 +353,6 @@ const galleryImages = [
     { id: 2, title: "东京塔", url: "https://images.unsplash.com/photo-1536098561742-ca998e48cbcc?w=500&auto=format&fit=crop" },
     { id: 3, title: "樱花", url: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=500&auto=format&fit=crop" },
     { id: 4, title: "猫咪", url: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=500&auto=format&fit=crop" },
-];
-
-const projects = [
-  {
-    id: 1,
-    title: "Mizuki OS (Web)",
-    title_en: "Mizuki OS (Web)",
-    desc: "一个运行在浏览器里的二次元风格模拟操作系统。支持窗口管理、简单的文件系统和内置小游戏。",
-    desc_en: "A web-based anime-style mock operating system with window management, file system and built-in games.",
-    tech: ["React", "TypeScript", "Vite", "Zustand"],
-    stars: 128,
-  },
-  {
-    id: 2,
-    title: "Genshin Impact Wiki 小程序",
-    title_en: "Genshin Wiki Mini Program",
-    desc: "原神资料查询助手，包含角色攻略、圣遗物评分计算器和每日素材提醒功能。",
-    desc_en: "Genshin Impact assistant including character guides, artifact rater and daily material reminders.",
-    tech: ["Vue 3", "Taro", "Node.js"],
-    stars: 89,
-  },
-  {
-    id: 3,
-    title: "Sakura Music Player",
-    title_en: "Sakura Music Player",
-    desc: "高颜值的在线音乐播放器，支持歌词滚动、频谱可视化和自定义主题。",
-    desc_en: "A beautiful online music player supporting lyrics scrolling, spectrum visualization and custom themes.",
-    tech: ["Next.js", "Web Audio API", "Tailwind"],
-    stars: 256,
-  },
-  {
-    id: 4,
-    title: "Live2D 看板娘插件",
-    title_en: "Live2D Widget",
-    desc: "为你的网站添加可爱的 Live2D 看板娘，支持模型切换、语音互动和动作捕捉。",
-    desc_en: "Add cute Live2D characters to your website, supporting model switching, voice interaction and motion capture.",
-    tech: ["PixiJS", "Live2D SDK", "JavaScript"],
-    stars: 512,
-  }
 ];
 
 const posts = [
@@ -442,8 +404,7 @@ const friendLinks = [
     { name: "Code Life", desc: "编程与生活", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Code", url: "#" },
 ];
 
-// --- 辅助函数 ---
-
+// --- Helper Functions ---
 const getThemeColor = (hue, alpha = 1, type = 'default') => {
   if (type === 'dark') return `hsla(${hue}, 60%, 65%, ${alpha})`;
   if (type === 'bg') return `hsla(${hue}, 90%, 90%, ${alpha})`;
@@ -457,7 +418,7 @@ const glassCardClass = (darkMode) =>
       : 'bg-white/60 border-white/50 text-gray-800 hover:bg-white/70'
   }`;
 
-// --- 组件定义 ---
+// --- Components ---
 
 const Typewriter = ({ phrases, hue, darkMode }) => {
   const [text, setText] = useState('');
@@ -483,7 +444,7 @@ const Typewriter = ({ phrases, hue, darkMode }) => {
   }, [text, isDeleting, loopNum, phrases, typingSpeed]);
 
   return (
-    <div className="font-cute text-2xl md:text-3xl h-12 flex items-center justify-center tracking-wide">
+    <div className="font-bold text-2xl md:text-3xl h-12 flex items-center justify-center tracking-wide">
       <span className="bg-gradient-to-r from-pink-400 via-purple-400 to-indigo-400 bg-clip-text text-transparent drop-shadow-sm pb-1" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.2)' }}>
         {text}
       </span>
@@ -518,7 +479,7 @@ const Hero = ({ hue, darkMode, t }) => {
            <Typewriter phrases={typewriterPhrases} hue={hue} darkMode={darkMode} />
         </div>
       </div>
-       
+        
       <div 
         className="absolute bottom-10 animate-bounce opacity-70 cursor-pointer p-4 hover:opacity-100 transition-opacity z-10" 
         onClick={handleScrollDown}
@@ -646,12 +607,13 @@ const InfoRow = ({ icon, label, value, isCopyable, hue, darkMode }) => {
     )
 }
 
-const SocialLink = ({ href, icon, color, hue }) => (
+const SocialLink = ({ href, icon, color, hue, darkMode }) => (
     <a 
       href={href} 
       target="_blank" 
       rel="noopener noreferrer"
-      className="w-10 h-10 flex items-center justify-center rounded-full transition-all duration-300 hover:scale-110 shadow-sm hover:shadow-md bg-white dark:bg-gray-700 text-gray-500 hover:text-white"
+      className={`w-10 h-10 flex items-center justify-center rounded-full transition-all duration-300 hover:scale-110 shadow-sm hover:shadow-md 
+        ${darkMode ? 'bg-gray-800 text-gray-400 hover:text-white border border-gray-700' : 'bg-white text-gray-500 hover:text-white'}`}
       style={{ '--hover-bg': color || getThemeColor(hue, 1, 'dark') }}
       onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = e.currentTarget.style.getPropertyValue('--hover-bg'); e.currentTarget.style.color = 'white'; }}
       onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = ''; e.currentTarget.style.color = ''; }}
@@ -727,15 +689,16 @@ const ProfileCardPro = ({ darkMode, hue, t }) => (
       </div>
 
       <div className="mb-6 flex justify-center gap-3 flex-wrap">
-           {SOCIAL_LINKS.map((link, i) => (
-                <SocialLink 
-                   key={i}
-                   href={link.href}
-                   icon={React.cloneElement(link.icon, { size: 20 + (link.sizeOffset || 0), strokeWidth: 2 })}
-                   color={link.color}
-                   hue={hue}
-                />
-           ))}
+            {SOCIAL_LINKS.map((link, i) => (
+                 <SocialLink 
+                    key={i}
+                    href={link.href}
+                    icon={React.cloneElement(link.icon, { size: 20 + (link.sizeOffset || 0), strokeWidth: 2 })}
+                    color={link.color}
+                    hue={hue}
+                    darkMode={darkMode}
+                 />
+            ))}
       </div>
 
       <div className="pt-4 border-t border-dashed border-gray-200 dark:border-gray-700/50">
@@ -794,7 +757,7 @@ const StatCard = ({ darkMode, hue, t }) => {
   );
 };
 
-// --- ArticleList (恢复为静态文章列表) ---
+// --- ArticleList ---
 const ArticleList = ({ darkMode, hue, lang }) => (
   <div className="space-y-6">
     {posts.map(post => (
@@ -842,7 +805,7 @@ const ArticleList = ({ darkMode, hue, lang }) => (
   </div>
 );
 
-// --- GitHub 博客视图 (现在用于 Projects) ---
+// --- GitHub Blog View ---
 
 const GithubBlogView = ({ darkMode, hue, t, lang }) => {
   const GITHUB_USERNAME = 'LengxiQwQ';
@@ -851,21 +814,26 @@ const GithubBlogView = ({ darkMode, hue, t, lang }) => {
   const [markdownContent, setMarkdownContent] = useState('');
   const [loadingRepos, setLoadingRepos] = useState(true);
   const [loadingReadme, setLoadingReadme] = useState(false);
-  const [showList, setShowList] = useState(true); // 移动端控制列表显示
+  const [showList, setShowList] = useState(true);
+  const [error, setError] = useState(null); // Add error state
   const markedLoaded = useMarked();
 
-  // 获取仓库列表
   useEffect(() => {
     const fetchRepos = async () => {
       try {
         setLoadingRepos(true);
+        setError(null);
         const response = await fetch(`https://api.github.com/users/${GITHUB_USERNAME}/repos?sort=updated&per_page=100`);
+        
+        if (response.status === 403) {
+            setError('rate_limit');
+            return;
+        }
+
         if (!response.ok) throw new Error('Failed to fetch');
         const data = await response.json();
-        // 按更新时间排序
         const sortedData = data.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
         setRepos(sortedData);
-        // 如果是桌面端，默认选第一个
         if (window.innerWidth > 768 && sortedData.length > 0) {
            handleSelectRepo(sortedData[0]);
         }
@@ -878,16 +846,19 @@ const GithubBlogView = ({ darkMode, hue, t, lang }) => {
     fetchRepos();
   }, []);
 
-  // 选择仓库
   const handleSelectRepo = async (repo) => {
     setSelectedRepo(repo);
     setLoadingReadme(true);
     setMarkdownContent('');
-    // 移动端选择后隐藏列表
+    setError(null);
     if (window.innerWidth < 768) setShowList(false);
 
     try {
       const response = await fetch(`https://api.github.com/repos/${GITHUB_USERNAME}/${repo.name}/readme`);
+      if (response.status === 403) {
+          setError('rate_limit');
+          return;
+      }
       if (response.status === 404) {
         setMarkdownContent(`# ${t('github_reader.no_readme')}\n(No README.md found)`);
         return;
@@ -920,19 +891,26 @@ const GithubBlogView = ({ darkMode, hue, t, lang }) => {
     } catch (e) { return 'Error parsing markdown'; }
   };
 
-  // 辅助函数：估算阅读时间
   const getReadingStats = (content) => {
       if (!content) return { words: 0, time: 0 };
-      const words = content.length; // 简单按字符数计算
-      const time = Math.ceil(words / 500); // 假设阅读速度 500字/分钟
-      return { words, time };
+      // Remove basic markdown syntax for better counting
+      const cleanContent = content.replace(/[#*`~>\[\]\(\)]/g, ''); 
+      // Count Chinese characters
+      const chinese = (cleanContent.match(/[\u4e00-\u9fa5]/g) || []).length;
+      // Count English words (approximate)
+      const english = (cleanContent.replace(/[\u4e00-\u9fa5]/g, '').match(/[a-zA-Z0-9_\u0392-\u03c9\u0400-\u04FF]+(?:\S*)/g) || []).length;
+      
+      const totalCount = chinese + english;
+      // Assuming average reading speed of 400 chars/words per minute mixed
+      const time = Math.ceil(totalCount / 400); 
+      
+      return { words: totalCount, time: time || 1 };
   };
 
   const stats = getReadingStats(markdownContent);
 
   return (
     <div className="flex flex-col animate-fade-in-content relative min-h-screen">
-      {/* 顶部标题区 (仅移动端显示，桌面端隐藏在列表头) */}
       <div className="md:hidden flex-none mb-4 flex items-center justify-between">
           <h2 className="text-xl font-bold flex items-center gap-2">
              <Code className="text-blue-500" /> {t('projects.title')}
@@ -946,7 +924,6 @@ const GithubBlogView = ({ darkMode, hue, t, lang }) => {
       </div>
 
       <div className="flex flex-col md:flex-row gap-6 items-start">
-         {/* 左侧列表 (Sticky Layout) */}
          <div className={`
              ${showList ? 'block' : 'hidden'} md:block
              w-full md:w-1/3 lg:w-1/4 
@@ -972,18 +949,15 @@ const GithubBlogView = ({ darkMode, hue, t, lang }) => {
                                     : (darkMode ? 'hover:bg-gray-800 text-gray-400 border border-transparent' : 'hover:bg-gray-100 text-gray-600 border border-transparent')
                                 }`}
                             >
-                                {/* 标题 (Repo Name) */}
                                 <div className="font-bold text-sm mb-1 truncate pr-2 flex items-center justify-between">
                                     <span>{repo.name}</span>
                                     {repo.private && <span className="text-[10px] border border-gray-500 px-1 rounded">Private</span>}
                                 </div>
                                 
-                                {/* 描述 (2行预览) */}
                                 <p className={`text-xs leading-relaxed line-clamp-2 mb-2 ${darkMode ? 'text-gray-500' : 'text-gray-500'}`} title={repo.description}>
                                     {repo.description || 'No description provided.'}
                                 </p>
 
-                                {/* 底部元数据: License, Star, Forks */}
                                 <div className="flex items-center gap-3 text-[10px] opacity-70">
                                     {repo.license && (
                                         <span className="flex items-center gap-1" title="License"><Scale size={10}/> {repo.license.spdx_id || 'LIC'}</span>
@@ -998,7 +972,6 @@ const GithubBlogView = ({ darkMode, hue, t, lang }) => {
              </div>
          </div>
 
-         {/* 右侧内容 (自适应高度) */}
          <div className={`
              flex-1 w-full min-w-0
              ${glassCardClass(darkMode)} 
@@ -1009,6 +982,12 @@ const GithubBlogView = ({ darkMode, hue, t, lang }) => {
                      <Loader2 className="animate-spin text-blue-500" size={40} />
                      <span className="text-sm font-medium animate-pulse">{t('github_reader.loading_repos')}</span>
                  </div>
+             ) : error === 'rate_limit' ? (
+                 <div className="flex-1 flex flex-col items-center justify-center text-gray-400 gap-4 py-20">
+                     <AlertTriangle size={64} className="text-yellow-500" strokeWidth={1} />
+                     <h3 className="text-xl font-bold text-gray-600 dark:text-gray-300">{t('github_reader.rate_limit')}</h3>
+                     <p className="text-sm text-center max-w-xs">{t('github_reader.rate_limit_desc')}</p>
+                 </div>
              ) : !selectedRepo ? (
                  <div className="flex-1 flex flex-col items-center justify-center text-gray-400 gap-4 opacity-50 py-20">
                      <BookOpen size={64} strokeWidth={1} />
@@ -1016,9 +995,7 @@ const GithubBlogView = ({ darkMode, hue, t, lang }) => {
                  </div>
              ) : (
                  <div className="p-6 md:p-10">
-                     {/* 文章头部信息区 */}
                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-4 border-b border-gray-200/50 dark:border-gray-700/50">
-                         {/* 整合的元数据行：时间 + 统计信息 (左对齐) */}
                          <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-gray-500 dark:text-gray-400">
                              <span className="flex items-center gap-1.5" title="Published">
                                  <Calendar size={14} className="text-blue-500"/> {t('github_reader.published')}: {new Date(selectedRepo.created_at).toLocaleDateString()}
@@ -1032,12 +1009,8 @@ const GithubBlogView = ({ darkMode, hue, t, lang }) => {
                              <span className="flex items-center gap-1.5" title="Reading Time">
                                  <Timer size={14} className="text-green-500"/> {stats.time} {t('github_reader.reading_time')}
                              </span>
-                             <span className="flex items-center gap-1.5 hidden sm:flex" title="Default Branch">
-                                 <GitBranch size={14} className="text-purple-500"/> {selectedRepo.default_branch}
-                             </span>
                          </div>
 
-                         {/* 顶部工具栏：源码链接在右侧 (右对齐) */}
                          <a 
                             href={selectedRepo.html_url} 
                             target="_blank" 
@@ -1048,13 +1021,11 @@ const GithubBlogView = ({ darkMode, hue, t, lang }) => {
                          </a>
                      </div>
 
-                     {/* Markdown 内容 (第一行会自动作为标题显示) */}
                      <div 
                         className={`markdown-body ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}
                         dangerouslySetInnerHTML={{ __html: getHtmlContent() }}
                      />
                      
-                     {/* 底部结束符 */}
                      <div className="mt-16 pt-8 border-t border-dashed border-gray-200 dark:border-gray-800 text-center">
                         <div className="text-2xl text-gray-300 dark:text-gray-700 font-serif italic">~ EOF ~</div>
                      </div>
@@ -1099,16 +1070,38 @@ const Navbar = ({
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showColorPicker, setShowColorPicker] = useState(false);
+  // Replaced useState with useRef for DOM elements to avoid state mutation issues and ensure direct access
+  const navButtonRefs = useRef({});
+  const [underlineStyle, setUnderlineStyle] = useState({ left: 0, width: 0, opacity: 0 });
   const pickerRef = useRef(null);
+  
+  // Define fixed width for the underline
+  const FIXED_UNDERLINE_WIDTH = 58;
 
   const handleNavClick = (viewId) => {
-    setCurrentView(viewId);
-    window.scrollTo({ top: 0, behavior: 'smooth' }); // 核心修改：切换页面时回到顶部
+    // If clicking home (either from current page or other page), jump instantly past hero
+    if (viewId === 'home') {
+        if (currentView === 'home') {
+            // Toggle behavior if already on home
+            if (window.scrollY < window.innerHeight / 2) {
+                window.scrollTo({ top: window.innerHeight - 80, behavior: 'smooth' });
+            } else {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        } else {
+            // If coming from another page, reset to top (Hero visible)
+            setCurrentView('home');
+            setTimeout(() => {
+                window.scrollTo({ top: window.innerHeight - 80, behavior: 'smooth' }); 
+            }, 10);
+        }
+    } else {
+        setCurrentView(viewId);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
     setIsMenuOpen(false);
   };
 
-  // 导航项配置
-  // 删除了 home 的 hasDropdown: true
   const navItems = [
       { id: 'home', icon: <Home size={18}/>, label: t('nav.home') },
       { id: 'daily', icon: <Coffee size={18}/>, label: t('nav.daily') }, 
@@ -1117,6 +1110,31 @@ const Navbar = ({
       { id: 'links', icon: <LinkIcon size={18}/>, label: t('nav.links') },
       { id: 'about', icon: <User size={18}/>, label: t('nav.about') },
   ];
+
+  // Logic for sliding underline with FIXED width centered
+  useEffect(() => {
+    const updateUnderline = () => {
+        const activeBtn = navButtonRefs.current[currentView];
+        if (activeBtn) {
+            // Calculate exact left position to center the fixed width underline under the button
+            // Center of button = offsetLeft + offsetWidth / 2
+            // Left of underline = Center of button - underlineWidth / 2
+            const leftPos = activeBtn.offsetLeft + (activeBtn.offsetWidth / 2) - (FIXED_UNDERLINE_WIDTH / 2);
+            
+            setUnderlineStyle({
+                left: leftPos,
+                width: FIXED_UNDERLINE_WIDTH,
+                opacity: 1
+            });
+        } else {
+            setUnderlineStyle(prev => ({ ...prev, opacity: 0 }));
+        }
+    };
+
+    updateUnderline();
+    window.addEventListener('resize', updateUnderline);
+    return () => window.removeEventListener('resize', updateUnderline);
+  }, [currentView, t, lang]); 
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -1136,10 +1154,9 @@ const Navbar = ({
     <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${darkMode ? 'bg-gray-900/60 border-gray-800/50' : 'bg-white/60 border-white/50'} backdrop-blur-md border-b`}>
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          {/* 左侧区域：头像 + 品牌下拉菜单 */}
-          <div className="flex-shrink-0 flex items-center gap-3">
-             {/* 头像：点击回首页 */}
-             <a href="https://lengxi.xyz" className="cursor-pointer group relative">
+          {/* Left: Avatar + Brand + Dropdown Container */}
+          <div className="flex-shrink-0 flex items-center gap-3 relative group">
+             <a href="https://lengxi.xyz" className="cursor-pointer relative">
                  <div className="relative w-10 h-10 rounded-full p-[2px]" style={{ background: 'conic-gradient(from 0deg, #4285F4 0deg 110deg, #EA4335 110deg 240deg, #FBBC05 240deg 300deg, #34A853 300deg 360deg)' }}>
                     <div className={`w-full h-full rounded-full overflow-hidden ${darkMode ? 'bg-gray-900' : 'bg-white'} p-[1.5px] transition-transform duration-700 group-hover:scale-105`}>
                         <img src={AVATAR_URL} alt="Logo" className="w-full h-full object-cover rounded-full" />
@@ -1147,54 +1164,72 @@ const Navbar = ({
                  </div>
              </a>
              
-             {/* 品牌名称：带有下拉菜单 */}
-             <div className="relative group cursor-pointer h-16 flex items-center">
-                 <span className={`font-bold text-xl tracking-wide font-comic ${darkMode ? 'text-white' : 'text-gray-800'}`}>
+             {/* Text Trigger */}
+             <div className="h-16 flex items-center cursor-pointer">
+                 <span className={`font-bold text-xl tracking-wide ${darkMode ? 'text-white' : 'text-gray-800'}`}>
                     {t('common.name')}
                  </span>
                  <ChevronDown size={16} className={`ml-1 opacity-50 group-hover:opacity-100 transition-opacity ${darkMode ? 'text-white' : 'text-gray-800'}`}/>
-                 
-                 {/* 下拉菜单内容 */}
-                 <div className="absolute top-12 left-0 pt-2 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top-left z-50">
-                     <div className={`rounded-xl shadow-lg overflow-hidden border p-1 backdrop-blur-xl ${darkMode ? 'bg-gray-800/90 border-gray-700' : 'bg-white/90 border-gray-200'}`}>
-                         <button 
-                             onClick={() => handleNavClick('home')}
-                             className={`w-full text-left px-4 py-3 rounded-lg text-sm transition-colors flex justify-between items-center ${darkMode ? 'hover:bg-white/10 text-gray-200' : 'hover:bg-gray-100 text-gray-700'}`}
-                         >
-                             {t('nav.home_station')}
-                             {currentView === 'home' && <Check size={14} className="text-blue-500" />}
-                         </button>
-                         <button 
-                             onClick={() => handleNavClick('daily')}
-                             className={`w-full text-left px-4 py-3 rounded-lg text-sm transition-colors flex justify-between items-center ${darkMode ? 'hover:bg-white/10 text-gray-200' : 'hover:bg-gray-100 text-gray-700'}`}
-                         >
-                             {t('nav.home_nest')}
-                             {currentView === 'daily' && <Check size={14} className="text-blue-500" />}
-                         </button>
+             </div>
+
+             {/* Centered Dropdown Menu */}
+             <div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 w-56 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top z-50">
+                 <div className={`rounded-xl shadow-lg overflow-hidden border p-1 backdrop-blur-xl ${darkMode ? 'bg-gray-800/90 border-gray-700' : 'bg-white/90 border-gray-200'}`}>
+                     {/* Static Station Item (Default Checked) */}
+                     <div 
+                         className={`w-full text-left px-4 py-3 rounded-lg text-sm transition-colors flex justify-between items-center cursor-default ${darkMode ? 'bg-white/5 text-gray-200' : 'bg-gray-50 text-gray-800'}`}
+                     >
+                         {t('nav.home_station')}
+                         <Check size={14} className="text-blue-500" />
+                     </div>
+                     
+                     {/* Static Nest Item (Renamed, Disabled Link, No Check) */}
+                     <div 
+                         className={`w-full text-left px-4 py-3 rounded-lg text-sm transition-colors flex justify-between items-center cursor-not-allowed opacity-60 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}
+                         title="Coming Soon"
+                     >
+                         {t('nav.home_nest')}
                      </div>
                  </div>
              </div>
           </div>
 
-          {/* Desktop Nav */}
-          <div className={`hidden md:flex items-center space-x-1 ${darkMode ? 'text-gray-200' : 'text-gray-600'}`}>
+          {/* Desktop Nav with Sliding Underline */}
+          <div className={`hidden md:flex items-center space-x-1 relative ${darkMode ? 'text-gray-200' : 'text-gray-600'}`}>
             {navItems.map((item) => (
                 <button
                     key={item.id}
+                    ref={el => {
+                        // Store refs directly in the current object
+                        if (el) navButtonRefs.current[item.id] = el;
+                    }}
                     onClick={() => handleNavClick(item.id)}
-                    className={`px-4 py-2 rounded-full text-base font-medium transition-all duration-300 flex items-center gap-2 relative group hover:bg-black/5 dark:hover:bg-white/5`}
+                    className={`px-4 py-2 rounded-lg text-base font-medium transition-all duration-300 flex items-center justify-center relative group hover:bg-black/5 dark:hover:bg-white/5`}
                 >
-                    <span className={`transition-colors ${currentView === item.id ? 'text-blue-500' : 'text-gray-400 group-hover:text-gray-500'}`}>
-                        {item.icon}
-                    </span>
-                    <span className={`${currentView === item.id ? (darkMode ? 'text-white' : 'text-gray-900') : ''}`}>
-                        {item.label}
+                    <span className="flex items-center gap-2 relative z-10">
+                        <span className={`transition-colors ${currentView === item.id ? 'text-blue-500' : 'text-gray-400 group-hover:text-gray-500'}`}>
+                            {item.icon}
+                        </span>
+                        <span className={`${currentView === item.id ? (darkMode ? 'text-white' : 'text-gray-900') : ''}`}>
+                            {item.label}
+                        </span>
                     </span>
                 </button>
             ))}
+            {/* The Sliding Underline */}
+            <div 
+                className="absolute bottom-0 h-[3px] rounded-full transition-all duration-300 ease-out"
+                style={{
+                    left: underlineStyle.left,
+                    width: underlineStyle.width,
+                    opacity: underlineStyle.opacity,
+                    backgroundColor: getThemeColor(hue, 1, 'dark'),
+                    // Removed transform translateX(-50%) to rely on precise left calculation
+                }}
+            />
           </div>
 
-          {/* 右侧功能区（桌面 + 移动端通用） */}
+          {/* Right Function Area */}
           <div className="flex items-center gap-2">
             <div className={`flex items-center space-x-1 ${darkMode ? 'text-gray-200' : 'text-gray-600'}`}>
                 <button 
@@ -1239,29 +1274,29 @@ const Navbar = ({
                           <span className="text-xs font-semibold text-gray-500 flex items-center gap-1 mb-3"><Sparkles size={12}/> {t('settings.dynamic_bg')}</span>
                           <div className="grid grid-cols-2 gap-3 mb-5">
                               {DYNAMIC_PRESETS.map((bg, idx) => (
-                                  <div key={idx} onClick={() => setBgConfig({...bgConfig, url: bg.url})} className={`h-16 rounded-xl cursor-pointer overflow-hidden border-2 relative group transition-all ${bgConfig.url === bg.url ? 'border-blue-500 shadow-md scale-[1.02]' : 'border-transparent hover:border-gray-200 dark:hover:border-gray-600'}`}>      
-                                                      {bg.url === 'default' ? (
-                                                          <div className="w-full h-full bg-gradient-to-br from-pink-50 to-blue-50 dark:from-gray-700 dark:to-gray-600 flex flex-col items-center justify-center relative overflow-hidden">
-                                                              <div className="absolute top-[-20%] left-[-20%] w-[80%] h-[80%] rounded-full bg-blue-400/20 blur-md"></div>
-                                                              <div className="absolute bottom-[-20%] right-[-20%] w-[80%] h-[80%] rounded-full bg-pink-400/20 blur-md"></div>
-                                                              <span className="text-[10px] text-gray-600 dark:text-gray-300 font-bold relative z-10">{bg.name}</span>
-                                                          </div>
-                                                        ) : (
-                                                          <div className="w-full h-full bg-black flex flex-col items-center justify-center relative overflow-hidden">
-                                                              <div className="absolute w-full h-full bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 opacity-80"></div>
-                                                              <span className="text-[10px] text-white font-bold relative z-10 drop-shadow-md">{bg.name}</span>
-                                                          </div>
-                                                        )}
-                                                      {bgConfig.url === bg.url && (<div className="absolute bottom-1.5 right-1.5 bg-blue-500 rounded-full p-[2px] shadow-sm flex items-center justify-center"><Check size={8} className="text-white" strokeWidth={3} /></div>)}
+                                  <div key={idx} onClick={() => setBgConfig({...bgConfig, url: bg.url})} className={`h-16 rounded-xl cursor-pointer overflow-hidden border-2 relative group transition-all ${bgConfig.url === bg.url ? 'border-blue-500 shadow-md scale-[1.02]' : 'border-transparent hover:border-gray-200 dark:hover:border-gray-600'}`}>        
+                                              {bg.url === 'default' ? (
+                                                  <div className="w-full h-full bg-gradient-to-br from-pink-50 to-blue-50 dark:from-gray-700 dark:to-gray-600 flex flex-col items-center justify-center relative overflow-hidden">
+                                                      <div className="absolute top-[-20%] left-[-20%] w-[80%] h-[80%] rounded-full bg-blue-400/20 blur-md"></div>
+                                                      <div className="absolute bottom-[-20%] right-[-20%] w-[80%] h-[80%] rounded-full bg-pink-400/20 blur-md"></div>
+                                                      <span className="text-[10px] text-gray-600 dark:text-gray-300 font-bold relative z-10">{bg.name}</span>
+                                                  </div>
+                                                ) : (
+                                                  <div className="w-full h-full bg-black flex flex-col items-center justify-center relative overflow-hidden">
+                                                      <div className="absolute w-full h-full bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 opacity-80"></div>
+                                                      <span className="text-[10px] text-white font-bold relative z-10 drop-shadow-md">{bg.name}</span>
+                                                  </div>
+                                                )}
+                                                {bgConfig.url === bg.url && (<div className="absolute bottom-1.5 right-1.5 bg-blue-500 rounded-full p-[2px] shadow-sm flex items-center justify-center"><Check size={8} className="text-white" strokeWidth={3} /></div>)}
                                   </div>
                               ))}
                           </div>
                           <span className="text-xs font-semibold text-gray-500 flex items-center gap-1 mb-3"><ImageIcon size={12}/> {t('settings.wallpaper')}</span>
                           <div className="grid grid-cols-3 gap-2 mb-4">
                               {WALLPAPER_PRESETS.map((bg, idx) => (
-                                  <div key={idx} onClick={() => setBgConfig({...bgConfig, url: bg.url})} className={`aspect-video rounded-lg cursor-pointer overflow-hidden border-2 relative group transition-all ${bgConfig.url === bg.url ? 'border-blue-500' : 'border-transparent hover:border-gray-200 dark:hover:border-gray-600'}`}>      
-                                          <img src={bg.url} alt={bg.name} className="w-full h-full object-cover" loading="lazy" />
-                                          {bgConfig.url === bg.url && (<div className="absolute bottom-1 right-1 bg-blue-500 rounded-full p-[2px] shadow-sm flex items-center justify-center"><Check size={8} className="text-white" strokeWidth={3} /></div>)}
+                                  <div key={idx} onClick={() => setBgConfig({...bgConfig, url: bg.url})} className={`aspect-video rounded-lg cursor-pointer overflow-hidden border-2 relative group transition-all ${bgConfig.url === bg.url ? 'border-blue-500' : 'border-transparent hover:border-gray-200 dark:hover:border-gray-600'}`}>        
+                                      <img src={bg.url} alt={bg.name} className="w-full h-full object-cover" loading="lazy" />
+                                      {bgConfig.url === bg.url && (<div className="absolute bottom-1 right-1 bg-blue-500 rounded-full p-[2px] shadow-sm flex items-center justify-center"><Check size={8} className="text-white" strokeWidth={3} /></div>)}
                                   </div>
                               ))}
                           </div>
@@ -1286,8 +1321,8 @@ const Navbar = ({
                   {darkMode ? <Sun size={20} /> : <Moon size={20} />}
                 </button>
             </div>
-          
-            {/* Mobile Menu Button (Hamburger) - 放在最右侧 */}
+            
+            {/* Mobile Menu Button (Hamburger) */}
             <div className="md:hidden flex items-center">
                <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="p-2 ml-1"><Menu size={24} className={darkMode ? 'text-white' : 'text-gray-800'}/></button>
             </div>
@@ -1295,7 +1330,7 @@ const Navbar = ({
         </div>
       </div>
       
-      {/* Mobile Nav Dropdown - 使用磨砂玻璃效果 */}
+      {/* Mobile Nav Dropdown */}
       {isMenuOpen && (
           <div className={`md:hidden absolute top-16 left-0 w-full border-b shadow-lg p-4 flex flex-col gap-2 backdrop-blur-xl animate-fade-in
             ${darkMode ? 'bg-gray-900/80 border-gray-800' : 'bg-white/80 border-white/50'}`}
@@ -1310,17 +1345,17 @@ const Navbar = ({
                     </button>
                ))}
                <div className="border-t my-2 border-gray-200 dark:border-gray-700"></div>
-               <button onClick={() => handleNavClick('home')} className="p-3 text-sm text-gray-500 flex justify-between">冷汐的小站 {currentView === 'home' && <Check size={14}/>}</button>
-               <button onClick={() => handleNavClick('daily')} className="p-3 text-sm text-gray-500 flex justify-between">冷汐的小窝 {currentView === 'daily' && <Check size={14}/>}</button>
+               <button className="p-3 text-sm text-gray-500 flex justify-between cursor-default">冷汐的小站 <Check size={14} className="text-blue-500"/></button>
+               <button className="p-3 text-sm text-gray-400 flex justify-between cursor-not-allowed">冷汐的次元小窝</button>
           </div>
       )}
     </nav>
   );
 };
 
-// --- 重新定义各个页面的视图组件 ---
+// --- Page Views ---
 
-// 1. 首页视图 (HomeView)
+// 1. HomeView
 const HomeView = ({ hue, darkMode, t, lang }) => (
     <div className="flex flex-col lg:flex-row gap-8 animate-fade-in-content">
         <div className="w-full lg:w-[28%] flex-shrink-0 space-y-6">
@@ -1338,7 +1373,7 @@ const HomeView = ({ hue, darkMode, t, lang }) => (
             </div>
         </div>
         <div className="w-full lg:w-[72%] flex flex-col gap-6">
-            {/* 欢迎语 */}
+            {/* Welcome */}
             <div className={`${glassCardClass(darkMode)} p-8 relative overflow-hidden`}>
                 <div className="relative z-10">
                     <h2 className="text-2xl font-bold mb-4">{t('home.welcome_title')}</h2>
@@ -1351,7 +1386,7 @@ const HomeView = ({ hue, darkMode, t, lang }) => (
                 </div>
             </div>
             
-            {/* 推荐内容 (精选一个文章和一个项目) */}
+            {/* Recommendations */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                  <div className={`${glassCardClass(darkMode)} p-6 hover:shadow-lg transition-all cursor-pointer`}>
                      <div className="flex items-center gap-2 mb-3 text-blue-500 font-bold text-sm"><Star size={14}/> {t('home.rec_project')}</div>
@@ -1376,7 +1411,7 @@ const HomeView = ({ hue, darkMode, t, lang }) => (
     </div>
 );
 
-// 2. 日常视图 (DailyView)
+// 2. DailyView
 const DailyView = ({ hue, darkMode, t }) => (
     <div className="flex flex-col gap-8 animate-fade-in-content">
         <div className="flex items-center gap-3">
@@ -1390,27 +1425,27 @@ const DailyView = ({ hue, darkMode, t }) => (
     </div>
 );
 
-// 3. 友链视图 (LinksView)
+// 3. LinksView
 const LinksView = ({ hue, darkMode, t }) => (
     <div className="animate-fade-in-content">
          <div className="text-center mb-10">
-             <h2 className="text-3xl font-bold mb-4 font-cute">{t('links.title')}</h2>
-             <p className="text-gray-500">{t('links.desc')}</p>
+             <h2 className={`text-3xl font-bold mb-4 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>{t('links.title')}</h2>
+             <p className={`${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{t('links.desc')}</p>
          </div>
          
          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
              {friendLinks.map((link, i) => (
-                 <a key={i} href={link.url} className={`flex items-center gap-4 p-4 rounded-2xl border transition-all hover:-translate-y-1 hover:shadow-lg ${darkMode ? 'bg-gray-800/50 border-gray-700 hover:bg-gray-800' : 'bg-white/60 border-gray-200 hover:bg-white'}`}>
+                 <a key={i} href={link.url} className={`flex items-center gap-4 p-4 rounded-2xl border transition-all hover:-translate-y-1 hover:shadow-lg ${darkMode ? 'bg-gray-800/50 border-gray-700 hover:bg-gray-800 text-gray-200' : 'bg-white/60 border-gray-200 hover:bg-white text-gray-800'}`}>
                      <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-gray-100 dark:border-gray-600 flex-shrink-0">
                          <img src={link.avatar} alt={link.name} className="w-full h-full object-cover" />
                      </div>
                      <div>
                          <h3 className="font-bold text-lg mb-1">{link.name}</h3>
-                         <p className="text-xs text-gray-400 line-clamp-2">{link.desc}</p>
+                         <p className="text-xs opacity-70 line-clamp-2">{link.desc}</p>
                      </div>
                  </a>
              ))}
-             {/* 申请友链卡片 */}
+             {/* Apply Link Card */}
              <div className={`flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border border-dashed cursor-pointer transition-colors ${darkMode ? 'border-gray-700 text-gray-500 hover:border-gray-500 hover:text-gray-300' : 'border-gray-300 text-gray-400 hover:border-gray-400 hover:text-gray-600'}`}>
                  <Plus size={32} />
                  <span className="text-sm font-medium">{t('links.apply')}</span>
@@ -1419,12 +1454,12 @@ const LinksView = ({ hue, darkMode, t }) => (
     </div>
 );
 
-// 4. 关于视图 (AboutView)
+// 4. AboutView
 const AboutView = ({ hue, darkMode, t }) => (
     <div className="max-w-4xl mx-auto animate-fade-in-content">
         <div className={`${glassCardClass(darkMode)} p-8 md:p-12`}>
             <div className="mb-10 text-center md:text-left">
-                 <h1 className="text-3xl font-bold mb-4 font-cute flex items-center gap-3 justify-center md:justify-start">
+                 <h1 className="text-3xl font-bold mb-4 flex items-center gap-3 justify-center md:justify-start">
                     <Terminal size={32} className="text-blue-500"/>
                     {t('about.title')}
                  </h1>
@@ -1435,7 +1470,7 @@ const AboutView = ({ hue, darkMode, t }) => (
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <section>
-                    <h3 className="text-xl font-bold mb-4 flex items-center gap-2 border-b pb-2 dark:border-gray-700">
+                    <h3 className={`text-xl font-bold mb-4 flex items-center gap-2 border-b pb-2 ${darkMode ? 'border-gray-700 text-gray-100' : 'border-gray-200 text-gray-800'}`}>
                         <Code size={20} className="text-blue-500"/> {t('about.tech_stack')}
                     </h3>
                     <ul className={`space-y-3 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
@@ -1447,7 +1482,7 @@ const AboutView = ({ hue, darkMode, t }) => (
                 </section>
 
                 <section>
-                    <h3 className="text-xl font-bold mb-4 flex items-center gap-2 border-b pb-2 dark:border-gray-700">
+                    <h3 className={`text-xl font-bold mb-4 flex items-center gap-2 border-b pb-2 ${darkMode ? 'border-gray-700 text-gray-100' : 'border-gray-200 text-gray-800'}`}>
                         <Layout size={20} className="text-purple-500"/> {t('about.features')}
                     </h3>
                     <ul className={`space-y-3 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
@@ -1468,7 +1503,7 @@ const AboutView = ({ hue, darkMode, t }) => (
     </div>
 );
 
-// --- 主程序 ---
+// --- Main App ---
 
 export default function App() {
   const [darkMode, setDarkMode] = useState(() => {
@@ -1495,12 +1530,10 @@ export default function App() {
     } catch (e) { return { url: WALLPAPER_PRESETS[0].url, blur: 3, opacity: 0.35 }; }
   });
 
-  // 语言状态
   const [lang, setLang] = useState(() => {
     try { return localStorage.getItem('lang') || 'zh'; } catch (e) { return 'zh'; }
   });
 
-  // 翻译 Helper
   const t = (key) => {
       const keys = key.split('.');
       let val = translations[lang];
@@ -1527,8 +1560,8 @@ export default function App() {
       switch(currentView) {
           case 'home': return <HomeView hue={hue} darkMode={darkMode} t={t} lang={lang} />;
           case 'daily': return <DailyView hue={hue} darkMode={darkMode} t={t} />;
-          case 'projects': return <GithubBlogView darkMode={darkMode} hue={hue} t={t} lang={lang} />; // 核心替换：Github 阅读器放这里
-          case 'articles': return <div className="animate-fade-in-content"><h2 className="text-2xl font-bold mb-6 flex items-center gap-2"><Book/> {t('articles.title')}</h2><ArticleList darkMode={darkMode} hue={hue} lang={lang} /></div>; // 恢复静态文章列表
+          case 'projects': return <GithubBlogView darkMode={darkMode} hue={hue} t={t} lang={lang} />;
+          case 'articles': return <div className="animate-fade-in-content"><h2 className="text-2xl font-bold mb-6 flex items-center gap-2"><Book/> {t('articles.title')}</h2><ArticleList darkMode={darkMode} hue={hue} lang={lang} /></div>;
           case 'links': return <LinksView hue={hue} darkMode={darkMode} t={t} />;
           case 'about': return <AboutView hue={hue} darkMode={darkMode} t={t} />;
           default: return <HomeView hue={hue} darkMode={darkMode} t={t} lang={lang} />;
@@ -1575,7 +1608,8 @@ export default function App() {
         setLang={setLang}
         t={t}
       />
-       
+        
+      {/* Show Hero ONLY on Home Page */}
       {currentView === 'home' && <Hero hue={hue} darkMode={darkMode} t={t} />}
 
       <main className={`max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 pb-20 relative z-20 min-h-[60vh] ${currentView === 'home' ? '' : 'pt-24'}`}>
