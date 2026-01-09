@@ -10,11 +10,8 @@ import {
   Code, Terminal, BadgeCheck, Camera, BookOpen, GitFork, Scale, Timer, AlertTriangle, Languages, Mail as MailIcon, Copy,
   Send, MessageSquare, MoreHorizontal
 } from 'lucide-react';
-// 引入 Twikoo
-import twikoo from 'twikoo';
 
 // --- 配置区域 ---
-// ✅ 正确的 Netlify Twikoo 云函数地址
 const TWIKOO_ENV_ID = "https://lengxi-website.netlify.app/.netlify/functions/twikoo"; 
 
 // --- Hook: Load marked.js dynamically ---
@@ -34,7 +31,12 @@ const useMarked = () => {
 };
 
 // --- Global Styles & Twikoo Custom Styles ---
-const GlobalStyles = ({ hue, darkMode }) => (
+const GlobalStyles = ({ hue, darkMode }) => {
+  // 动态生成主题色，用于 Twikoo CSS 注入
+  const themeColor = `hsla(${hue}, 60%, 65%, 1)`;
+  const themeColorDark = `hsla(${hue}, 60%, 65%, 1)`;
+  
+  return (
   <style>{`
     @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap');
     
@@ -97,62 +99,154 @@ const GlobalStyles = ({ hue, darkMode }) => (
     .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(156, 163, 175, 0.8); }
 
     /* ========================================= */
-    /* --- Twikoo 强制样式覆盖 (防止看不见) --- */
+    /* --- Twikoo 深度定制 (GUI 修复与美化) --- */
     /* ========================================= */
     
-    .tk-main {
-      font-family: 'Nunito', sans-serif !important;
-      position: relative;
-      z-index: 10;
-    }
-    
-    /* 输入框区域背景和文字颜色 */
-    .el-input__inner, .el-textarea__inner {
-      background-color: ${darkMode ? 'rgba(31, 41, 55, 0.6)' : 'rgba(255, 255, 255, 0.8)'} !important;
-      border: 1px solid ${darkMode ? 'rgba(75, 85, 99, 0.5)' : 'rgba(229, 231, 235, 1)'} !important;
-      color: ${darkMode ? '#e5e7eb' : '#374151'} !important;
-      border-radius: 8px !important;
-    }
-    
-    /* 评论列表卡片 */
-    .tk-content {
-      color: ${darkMode ? '#d1d5db' : '#4b5563'} !important;
-      font-size: 0.9rem !important;
-    }
-    .tk-comment {
-        margin-top: 1rem !important;
-        padding: 12px !important;
-        border-radius: 12px !important;
-        background: ${darkMode ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)'} !important;
-        border: 1px solid ${darkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'} !important;
+    #tcomment {
+        position: relative;
+        z-index: 10; /* 确保层级高于背景 */
+        pointer-events: auto; /* 强制开启鼠标事件 */
     }
 
-    /* 提交按钮 - 强制显色 */
-    .tk-submit {
-      background: ${darkMode ? '#3b82f6' : '#2563eb'} !important;
-      color: #ffffff !important;
-      border-radius: 8px !important;
-      padding: 0 20px !important;
-      border: none !important;
-      cursor: pointer !important;
+    /* 1. 输入框区域重构 - 玻璃拟态 */
+    .tk-main .tk-input .el-textarea__inner {
+        min-height: 120px !important; /* 强制加高 */
+        background-color: ${darkMode ? 'rgba(30, 41, 59, 0.6)' : 'rgba(255, 255, 255, 0.6)'} !important;
+        backdrop-filter: blur(10px);
+        border: 1px solid ${darkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)'} !important;
+        border-radius: 16px !important;
+        color: ${darkMode ? '#f3f4f6' : '#1f2937'} !important;
+        padding: 16px !important;
+        font-family: inherit !important;
+        font-size: 14px !important;
+        box-shadow: none !important;
+        transition: all 0.3s ease;
+        resize: none !important; /* 禁止拖拽改变大小，保持美观 */
     }
     
-    /* 头像 */
+    /* 输入框聚焦态 */
+    .tk-main .tk-input .el-textarea__inner:focus {
+        background-color: ${darkMode ? 'rgba(30, 41, 59, 0.9)' : 'rgba(255, 255, 255, 0.95)'} !important;
+        border-color: ${themeColor} !important;
+        box-shadow: 0 0 0 3px ${darkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)'} !important;
+    }
+
+    /* 2. 昵称/邮箱/网址输入行 */
+    .tk-meta-input {
+        display: flex !important;
+        gap: 8px !important;
+        margin-top: 12px !important;
+        flex-wrap: wrap !important;
+    }
+    .tk-meta-input .el-input {
+        width: auto !important;
+        flex: 1 1 30% !important; /* 三等分 */
+    }
+    .tk-meta-input .el-input__inner {
+        background-color: ${darkMode ? 'rgba(30, 41, 59, 0.6)' : 'rgba(255, 255, 255, 0.6)'} !important;
+        border: 1px solid ${darkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)'} !important;
+        border-radius: 12px !important;
+        height: 40px !important;
+        color: ${darkMode ? '#f3f4f6' : '#1f2937'} !important;
+        padding: 0 12px !important;
+    }
+    .tk-meta-input .el-input__inner:focus {
+        border-color: ${themeColor} !important;
+    }
+
+    /* 3. 底部操作区 & 发送按钮 */
+    .tk-row.actions {
+        margin-top: 12px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        padding: 0 4px !important;
+    }
+    .tk-row.actions .tk-submit {
+        background: ${themeColor} !important; /* 使用你的主题色 */
+        color: white !important;
+        border: none !important;
+        border-radius: 12px !important;
+        padding: 8px 24px !important;
+        font-weight: 700 !important;
+        font-size: 14px !important;
+        cursor: pointer !important;
+        transition: transform 0.2s, opacity 0.2s !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+    }
+    .tk-row.actions .tk-submit:hover {
+        opacity: 0.9 !important;
+        transform: translateY(-1px) !important;
+    }
+    .tk-row.actions .tk-submit:active {
+        transform: scale(0.95) !important;
+    }
+    
+    /* 4. 评论列表卡片化 */
+    .tk-comments-container .tk-comment {
+        margin-top: 16px !important;
+        padding: 16px !important;
+        background: ${darkMode ? 'rgba(30, 41, 59, 0.4)' : 'rgba(255, 255, 255, 0.5)'} !important;
+        border: 1px solid ${darkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.4)'} !important;
+        border-radius: 16px !important;
+        backdrop-filter: blur(5px) !important;
+        transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+    }
+    .tk-comments-container .tk-comment:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 10px 20px -5px rgba(0,0,0,0.1) !important;
+    }
+
+    /* 5. 头像样式 */
     .tk-avatar {
-        border-radius: 50% !important;
         border: 2px solid ${darkMode ? '#374151' : '#fff'} !important;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+        width: 40px !important;
+        height: 40px !important;
+        border-radius: 50% !important;
     }
     
-    /* 昵称颜色 */
-    .tk-nick { color: ${darkMode ? '#60a5fa' : '#2563eb'} !important; font-weight: bold !important; }
+    /* 6. 评论内容 */
+    .tk-content {
+        margin-top: 8px !important;
+        color: ${darkMode ? '#e5e7eb' : '#374151'} !important;
+        font-size: 14px !important;
+        line-height: 1.6 !important;
+    }
+    .tk-content a {
+        color: ${themeColor} !important;
+        text-decoration: underline !important;
+    }
+
+    /* 7. 昵称和时间 */
+    .tk-nick {
+        font-size: 14px !important;
+        font-weight: 700 !important;
+        color: ${darkMode ? '#f3f4f6' : '#111827'} !important;
+    }
+    .tk-time {
+        font-size: 12px !important;
+        color: #9ca3af !important;
+        margin-left: 8px !important;
+    }
+
+    /* 8. 隐藏不需要的元素 */
+    .tk-footer { display: none !important; } /* 隐藏 Twikoo 版权 */
+    .tk-icon.__comments { display: none !important; }
     
-    /* 预览和表情框 */
-    .tk-owo-emotion { width: auto !important; max-width: 100% !important; }
-    
-    /* 隐藏版权信息 (可选) */
-    .tk-footer { opacity: 0.4; font-size: 0.75rem; margin-top: 20px; text-align: center; }
+    /* 9. 表情选择器 */
+    .tk-owo-emotion {
+        cursor: pointer !important;
+        transition: transform 0.2s !important;
+    }
+    .tk-owo-emotion:hover {
+        transform: scale(1.2) !important;
+    }
   `}</style>
-);
+  );
+};
 
 // --- Translation Dictionary ---
 const translations = {
@@ -245,7 +339,7 @@ const translations = {
       intro: '本站是一个基于现代前端技术栈构建的个人展示空间。设计上追求极简与美观的平衡，交互上注重流畅与响应式体验。\n无论是代码的编写还是界面的打磨，都倾注了对技术的热爱。',
       tech_stack: '技术栈',
       features: '设计特性',
-      version: '当前版本：v2.5.9 (Final)'
+      version: '当前版本：v2.6.0 (Polished)'
     },
     settings: {
       title: '个性化设置',
@@ -306,7 +400,7 @@ const translations = {
       articles: 'Articles',
       runtime: 'Run Days',
       visits: 'Visits',
-      days: ''
+      days: '' 
     },
     home: {
       welcome_title: '👋 Hi, Nice to meet you!',
@@ -355,7 +449,7 @@ const translations = {
       intro: 'This site is built with a modern frontend stack, aiming for a balance between minimalism and aesthetics.\nBoth the code and the interface design reflect my passion for technology.',
       tech_stack: 'Tech Stack',
       features: 'Features',
-      version: 'Current Version: v2.5.9 (Final)'
+      version: 'Current Version: v2.6.0 (Polished)'
     },
     settings: {
       title: 'Personalization',
@@ -787,39 +881,45 @@ const StatCard = ({ darkMode, hue, t }) => {
   );
 };
 
-// --- Twikoo Guestbook Component ---
-// ⚠️ 稳健版组件：防止重复初始化、处理报错
+// --- Twikoo Guestbook Component (CDN 版) ---
 const Guestbook = ({ darkMode, hue, t }) => {
     const initialized = useRef(false);
     const [status, setStatus] = useState('loading'); // loading, success, error
 
     useEffect(() => {
         if (initialized.current) return;
-        
-        // 延迟一帧，确保 DOM 已经完全挂载
-        requestAnimationFrame(() => {
+
+        // 定义初始化函数
+        const initTwikoo = () => {
             const container = document.getElementById('tcomment');
-            if (container) {
+            // 检查容器是否存在以及 window.twikoo 是否加载完毕
+            if (container && window.twikoo) {
                 initialized.current = true;
-                
+                console.log("正在初始化 Twikoo (CDN)...");
+
                 try {
-                    twikoo.init({
+                    window.twikoo.init({
                         envId: TWIKOO_ENV_ID,
                         el: '#tcomment',
-                        // lang: 'zh-CN', // 可选：强制中文
                     }).then(() => {
-                        console.log('Twikoo init success');
+                        console.log('Twikoo 初始化成功');
                         setStatus('success');
                     }).catch(err => {
-                        console.error('Twikoo init error:', err);
+                        console.error('Twikoo 初始化失败:', err);
                         setStatus('error');
                     });
                 } catch (e) {
-                    console.error("Twikoo crash:", e);
+                    console.error("Twikoo 运行错误:", e);
                     setStatus('error');
                 }
+            } else {
+                // 如果脚本还没加载完，或者 DOM 还没渲染完，稍后重试
+                setTimeout(initTwikoo, 500);
             }
-        });
+        };
+
+        // 使用 requestAnimationFrame 开始尝试
+        requestAnimationFrame(initTwikoo);
     }, []);
 
     return (
@@ -829,9 +929,9 @@ const Guestbook = ({ darkMode, hue, t }) => {
                <h3 className="font-bold flex items-center gap-2 text-sm">
                  <MessageSquare size={16} className="text-pink-500"/> {t('guestbook.title')}
                </h3>
-               {status === 'loading' && <span className="text-[10px] text-gray-400 flex items-center gap-1"><Loader2 className="animate-spin" size={10}/> Connecting...</span>}
+               {status === 'loading' && <span className="text-[10px] text-gray-400 flex items-center gap-1"><Loader2 className="animate-spin" size={10}/> Loading...</span>}
                {status === 'success' && <span className="text-[10px] px-2 py-0.5 rounded-full bg-pink-100 dark:bg-pink-900/30 text-pink-500 font-bold">Live</span>}
-               {status === 'error' && <span className="text-[10px] text-red-500 font-bold">Connection Failed</span>}
+               {status === 'error' && <span className="text-[10px] text-red-500 font-bold">Failed</span>}
             </div>
 
             {/* Twikoo 挂载点 */}
@@ -1430,8 +1530,8 @@ const LinksView = ({ hue, darkMode, t }) => {
              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                  {/* 申请友链入口 */}
                  <div 
-                    onClick={handleEmailClick}
-                    className={`flex flex-col items-center justify-center gap-2 p-6 rounded-2xl border border-dashed cursor-pointer transition-all hover:-translate-y-1 hover:shadow-lg ${darkMode ? 'border-gray-700 text-gray-500 hover:border-gray-500 hover:text-gray-300 bg-gray-800/20' : 'border-gray-300 text-gray-400 hover:border-gray-400 hover:text-gray-600 bg-gray-50/50'}`}
+                   onClick={handleEmailClick}
+                   className={`flex flex-col items-center justify-center gap-2 p-6 rounded-2xl border border-dashed cursor-pointer transition-all hover:-translate-y-1 hover:shadow-lg ${darkMode ? 'border-gray-700 text-gray-500 hover:border-gray-500 hover:text-gray-300 bg-gray-800/20' : 'border-gray-300 text-gray-400 hover:border-gray-400 hover:text-gray-600 bg-gray-50/50'}`}
                  >
                      {copied ? (
                          <div className="flex flex-col items-center animate-in zoom-in">
@@ -1572,7 +1672,7 @@ const HomeView = ({ hue, darkMode, t, lang }) => (
              </div>
              
              <button className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold transition-all ${darkMode ? 'bg-white/10 hover:bg-white/20 text-white' : 'bg-black/5 hover:bg-black/10 text-gray-800'}`}>
-                阅读全文 <SkipForward size={14}/>
+               阅读全文 <SkipForward size={14}/>
              </button>
           </div>
         </div>
