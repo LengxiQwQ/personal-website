@@ -32,9 +32,7 @@ const useMarked = () => {
 
 // --- Global Styles & Twikoo Custom Styles ---
 const GlobalStyles = ({ hue, darkMode }) => {
-  // 动态生成主题色，用于 Twikoo CSS 注入
   const themeColor = `hsla(${hue}, 60%, 65%, 1)`;
-  const themeColorDark = `hsla(${hue}, 60%, 65%, 1)`;
   
   return (
   <style>{`
@@ -56,23 +54,6 @@ const GlobalStyles = ({ hue, darkMode }) => {
     }
     .animate-fade-in-content {
       animation: fadeIn 0.4s ease-out forwards;
-    }
-    
-    .animate-blob {
-      animation: blob 7s infinite;
-      will-change: transform;
-    }
-    .animation-delay-2000 {
-      animation-delay: 2s;
-    }
-    .animation-delay-4000 {
-      animation-delay: 4s;
-    }
-    @keyframes blob {
-      0% { transform: translate(0px, 0px) scale(1); }
-      33% { transform: translate(30px, -50px) scale(1.1); }
-      66% { transform: translate(-20px, 20px) scale(0.9); }
-      100% { transform: translate(0px, 0px) scale(1); }
     }
 
     /* --- Markdown Styles --- */
@@ -99,150 +80,255 @@ const GlobalStyles = ({ hue, darkMode }) => {
     .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(156, 163, 175, 0.8); }
 
     /* ========================================= */
-    /* --- Twikoo 深度定制 (GUI 修复与美化) --- */
+    /* --- Twikoo 终极修复 (修复头像 + 提示文字) --- */
     /* ========================================= */
     
+    .tk-main, .tk-main * {
+        box-sizing: border-box !important;
+    }
+
     #tcomment {
         position: relative;
-        z-index: 10; /* 确保层级高于背景 */
-        pointer-events: auto; /* 强制开启鼠标事件 */
+        z-index: 10;
+        width: 100%;
+        overflow: hidden;
+    }
+    .tk-main {
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
     }
 
-    /* 1. 输入框区域重构 - 玻璃拟态 */
-    .tk-main .tk-input .el-textarea__inner {
-        min-height: 120px !important; /* 强制加高 */
-        background-color: ${darkMode ? 'rgba(30, 41, 59, 0.6)' : 'rgba(255, 255, 255, 0.6)'} !important;
-        backdrop-filter: blur(10px);
-        border: 1px solid ${darkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)'} !important;
-        border-radius: 16px !important;
-        color: ${darkMode ? '#f3f4f6' : '#1f2937'} !important;
-        padding: 16px !important;
-        font-family: inherit !important;
-        font-size: 14px !important;
+    /* --- 1. 布局：强制垂直排列 --- */
+    .tk-submit .tk-row {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        margin: 0 !important;
+        gap: 16px !important;
+    }
+
+    /* --- 2. 头像 (已修复对齐) --- */
+    .tk-avatar {
+        display: flex !important;
+        justify-content: center;
+        align-items: center;
+        width: 64px !important;
+        height: 64px !important;
+        border-radius: 50% !important;
+        border: 4px solid ${darkMode ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.5)'} !important;
         box-shadow: none !important;
-        transition: all 0.3s ease;
-        resize: none !important; /* 禁止拖拽改变大小，保持美观 */
+        margin: 0 !important;
+        overflow: hidden !important;
+        padding: 0 !important;
+        transition: none !important;
+        transform: none !important;
     }
-    
-    /* 输入框聚焦态 */
-    .tk-main .tk-input .el-textarea__inner:focus {
-        background-color: ${darkMode ? 'rgba(30, 41, 59, 0.9)' : 'rgba(255, 255, 255, 0.95)'} !important;
-        border-color: ${themeColor} !important;
-        box-shadow: 0 0 0 3px ${darkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)'} !important;
+    .tk-avatar img {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important;
+        border-radius: 50% !important;
+        margin: 0 !important;
     }
 
-    /* 2. 昵称/邮箱/网址输入行 */
+    /* --- 3. 输入区域容器 --- */
+    .tk-col {
+        width: 100% !important;
+        padding: 0 !important;
+    }
+
+    /* --- 4. 昵称/邮箱/网址 (垂直堆叠) --- */
     .tk-meta-input {
         display: flex !important;
-        gap: 8px !important;
-        margin-top: 12px !important;
-        flex-wrap: wrap !important;
+        flex-direction: column !important;
+        gap: 12px !important;
+        margin-bottom: 12px !important;
+        width: 100% !important;
     }
     .tk-meta-input .el-input {
-        width: auto !important;
-        flex: 1 1 30% !important; /* 三等分 */
+        width: 100% !important;
+        margin: 0 !important;
     }
-    .tk-meta-input .el-input__inner {
-        background-color: ${darkMode ? 'rgba(30, 41, 59, 0.6)' : 'rgba(255, 255, 255, 0.6)'} !important;
-        border: 1px solid ${darkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)'} !important;
+    
+    /* --- 核心：输入框样式 (全透明边框，无动画) --- */
+    .tk-meta-input .el-input__inner,
+    .tk-input .el-textarea__inner {
+        width: 100% !important;
+        background-color: ${darkMode ? 'rgba(0, 0, 0, 0.2)' : 'rgba(255, 255, 255, 0.5)'} !important;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        
+        /* 边框：全透明 */
+        border: 1px solid transparent !important; 
         border-radius: 12px !important;
-        height: 40px !important;
+        
+        /* 字体颜色 */
         color: ${darkMode ? '#f3f4f6' : '#1f2937'} !important;
-        padding: 0 12px !important;
-    }
-    .tk-meta-input .el-input__inner:focus {
-        border-color: ${themeColor} !important;
+        
+        /* 去除所有阴影和动画 */
+        box-shadow: none !important;
+        transition: none !important;
+        transform: none !important;
     }
 
-    /* 3. 底部操作区 & 发送按钮 */
-    .tk-row.actions {
-        margin-top: 12px !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: space-between !important;
-        padding: 0 4px !important;
+    /* 尺寸 */
+    .tk-meta-input .el-input__inner {
+        height: 44px !important;
+        line-height: 44px !important;
+        padding: 0 16px !important;
     }
-    .tk-row.actions .tk-submit {
-        background: ${themeColor} !important; /* 使用你的主题色 */
-        color: white !important;
+    .tk-input .el-textarea__inner {
+        min-height: 120px !important;
+        padding: 16px !important;
+        resize: none !important;
+        margin-bottom: 4px !important;
+    }
+
+    /* 聚焦状态 */
+    .tk-meta-input .el-input__inner:focus,
+    .tk-input .el-textarea__inner:focus {
+        background-color: ${darkMode ? 'rgba(0, 0, 0, 0.4)' : 'rgba(255, 255, 255, 0.8)'} !important;
+        border-color: transparent !important;
+        box-shadow: none !important;
+    }
+
+    /* --- 关键修复：找回提示文字 (Placeholder) --- */
+    /* 我们把每个选择器单独写，避免浏览器因为不识别某个前缀而整行忽略 */
+    
+    /* Webkit (Chrome, Safari, Edge) */
+    .tk-main input::-webkit-input-placeholder {
+        color: ${darkMode ? '#d1d5db' : '#6b7280'} !important; 
+        opacity: 1 !important;
+    }
+    .tk-main textarea::-webkit-input-placeholder {
+        color: ${darkMode ? '#d1d5db' : '#6b7280'} !important;
+        opacity: 1 !important;
+    }
+
+    /* Mozilla Firefox */
+    .tk-main input::-moz-placeholder {
+        color: ${darkMode ? '#d1d5db' : '#6b7280'} !important;
+        opacity: 1 !important;
+    }
+    .tk-main textarea::-moz-placeholder {
+        color: ${darkMode ? '#d1d5db' : '#6b7280'} !important;
+        opacity: 1 !important;
+    }
+
+    /* Standard */
+    .tk-main input::placeholder {
+        color: ${darkMode ? '#d1d5db' : '#6b7280'} !important;
+        opacity: 1 !important;
+    }
+    .tk-main textarea::placeholder {
+        color: ${darkMode ? '#d1d5db' : '#6b7280'} !important;
+        opacity: 1 !important;
+    }
+
+    /* --- 5. 底部操作栏 --- */
+    .tk-row.actions {
+        display: flex !important;
+        flex-direction: row !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 8px 0 0 0 !important;
+        position: relative !important;
+    }
+
+    /* 左侧图标 */
+    .tk-action-icon {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        margin-right: 16px !important;
+        cursor: pointer !important;
+        color: ${darkMode ? '#9ca3af' : '#6b7280'} !important;
+        transition: none !important; /* 禁止动画 */
+    }
+    .tk-action-icon:hover {
+        color: ${darkMode ? '#ffffff' : '#000000'} !important; /* 仅变色 */
+    }
+
+    /* --- 右侧按钮容器 (无形容器) --- */
+    .tk-submit {
+        background: transparent !important;
         border: none !important;
-        border-radius: 12px !important;
+        box-shadow: none !important;
+        color: ${themeColor} !important; /* 文字颜色 */
         padding: 8px 24px !important;
         font-weight: 700 !important;
         font-size: 14px !important;
         cursor: pointer !important;
-        transition: transform 0.2s, opacity 0.2s !important;
-        display: flex !important;
-        align-items: center !important;
-        gap: 6px !important;
-    }
-    .tk-row.actions .tk-submit:hover {
-        opacity: 0.9 !important;
-        transform: translateY(-1px) !important;
-    }
-    .tk-row.actions .tk-submit:active {
-        transform: scale(0.95) !important;
+        
+        /* 强制禁止所有动态效果 */
+        transform: none !important;
+        transition: none !important;
+        animation: none !important;
     }
     
-    /* 4. 评论列表卡片化 */
-    .tk-comments-container .tk-comment {
-        margin-top: 16px !important;
-        padding: 16px !important;
-        background: ${darkMode ? 'rgba(30, 41, 59, 0.4)' : 'rgba(255, 255, 255, 0.5)'} !important;
-        border: 1px solid ${darkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.4)'} !important;
+    /* 悬停/点击：绝对没有任何变化 */
+    .tk-submit:hover,
+    .tk-submit:active,
+    .tk-submit:focus {
+        background: transparent !important;
+        transform: none !important;
+        box-shadow: none !important;
+        opacity: 1 !important; 
+        color: ${themeColor} !important;
+    }
+
+    /* --- 6. 评论展示列表 --- */
+    .tk-comments-container {
+        margin-top: 32px !important;
+    }
+    .tk-comment {
+        margin-top: 20px !important;
+        padding: 20px !important;
+        background: ${darkMode ? 'rgba(30, 41, 59, 0.3)' : 'rgba(255, 255, 255, 0.4)'} !important;
+        border: 1px solid transparent !important;
         border-radius: 16px !important;
         backdrop-filter: blur(5px) !important;
-        transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+        transition: none !important;
     }
-    .tk-comments-container .tk-comment:hover {
-        transform: translateY(-2px) !important;
-        box-shadow: 0 10px 20px -5px rgba(0,0,0,0.1) !important;
+    .tk-comment .tk-avatar {
+        width: 44px !important;
+        height: 44px !important;
+        border: none !important;
+        margin-right: 16px !important;
     }
-
-    /* 5. 头像样式 */
-    .tk-avatar {
-        border: 2px solid ${darkMode ? '#374151' : '#fff'} !important;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
-        width: 40px !important;
-        height: 40px !important;
-        border-radius: 50% !important;
-    }
-    
-    /* 6. 评论内容 */
-    .tk-content {
-        margin-top: 8px !important;
-        color: ${darkMode ? '#e5e7eb' : '#374151'} !important;
-        font-size: 14px !important;
-        line-height: 1.6 !important;
-    }
-    .tk-content a {
-        color: ${themeColor} !important;
-        text-decoration: underline !important;
-    }
-
-    /* 7. 昵称和时间 */
     .tk-nick {
-        font-size: 14px !important;
+        font-size: 15px !important;
         font-weight: 700 !important;
         color: ${darkMode ? '#f3f4f6' : '#111827'} !important;
     }
-    .tk-time {
-        font-size: 12px !important;
-        color: #9ca3af !important;
-        margin-left: 8px !important;
+    .tk-content {
+        margin-top: 8px !important;
+        font-size: 15px !important;
+        line-height: 1.7 !important;
+        color: ${darkMode ? '#d1d5db' : '#374151'} !important;
+    }
+    .tk-content a {
+        color: ${themeColor} !important;
+        text-decoration: none !important;
+        border-bottom: 1px dashed ${themeColor} !important;
     }
 
-    /* 8. 隐藏不需要的元素 */
-    .tk-footer { display: none !important; } /* 隐藏 Twikoo 版权 */
+    /* --- 7. 杂项隐藏 --- */
+    .tk-footer { display: none !important; }
     .tk-icon.__comments { display: none !important; }
+    .tk-meta-input .el-input-group__prepend { display: none !important; }
     
-    /* 9. 表情选择器 */
-    .tk-owo-emotion {
-        cursor: pointer !important;
-        transition: transform 0.2s !important;
-    }
-    .tk-owo-emotion:hover {
-        transform: scale(1.2) !important;
+    /* 预览框 */
+    .tk-preview-container {
+        border: 1px dashed ${darkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'} !important;
+        background: transparent !important;
+        border-radius: 12px !important;
+        margin-bottom: 16px !important;
+        padding: 16px !important;
+        width: 100% !important;
     }
   `}</style>
   );
