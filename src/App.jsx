@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { 
   Moon, Sun, Menu, Search, Github, Youtube, 
-  MessageCircle, Home, Book, Link as LinkIcon, User, 
+  Home, Book, Link as LinkIcon, User, 
   MoreHorizontal, ChevronDown, Music, Image as ImageIcon, 
   FileText, Calendar, Clock, BarChart2, Tag, Coffee, 
   Heart, Play, SkipForward, Palette, X, MapPin, GraduationCap,
   Zap, Mail, Copy, Check, Instagram, Gamepad2, ExternalLink, Star, 
   Settings, Sliders, Image as ImgIcon, Upload, Sparkles, Layout, Cloud, FolderGit2, Loader2, Plus,
-  Quote, Code, Terminal, BadgeCheck, MessageSquare, Camera, Link2, Smile, Layers, Monitor, Paintbrush, Globe, Languages,
+  Quote, Code, Terminal, BadgeCheck, Camera, Link2, Smile, Layers, Monitor, Paintbrush, Globe, Languages,
   BookOpen, GitBranch, Eye, GitFork, Scale, Timer, AlertTriangle
 } from 'lucide-react';
 
@@ -50,6 +50,7 @@ const GlobalStyles = ({ hue, darkMode }) => (
     
     .animate-blob {
       animation: blob 7s infinite;
+      will-change: transform; /* Performance fix: Hardware acceleration */
     }
     .animation-delay-2000 {
       animation-delay: 2s;
@@ -112,10 +113,10 @@ const translations = {
     profile: {
       role: '在读大学生 · IT',
       location: '马来西亚，森美兰州',
-      status: '感觉没有打游戏的动力了，只想钻研技术',
+      status: '暂时放弃游戏主线任务，转为狂刷技术副本',
       learning: '正在钻研：Unity & C#',
-      bio: '热衷于探索各种新技术的死宅，梦想是开发出属于自己的开放世界游戏。(´• ω •`)',
-      message: '留言',
+      bio: '在技术与游戏之间反复横跳，梦想是打造自由度拉满的开放世界(´• ω •`)',
+      message: '留言', // Keep translation key but unused
       skills: '技能分布',
       online: '在线'
     },
@@ -176,7 +177,7 @@ const translations = {
       intro: '本站是一个基于现代前端技术栈构建的个人展示空间。设计上追求极简与美观的平衡，交互上注重流畅与响应式体验。\n无论是代码的编写还是界面的打磨，都倾注了对技术的热爱。',
       tech_stack: '技术栈',
       features: '设计特性',
-      version: '当前版本：v2.5.0 (Polished)'
+      version: '当前版本：v2.5.2 (No Guestbook)'
     },
     settings: {
       title: '个性化设置',
@@ -202,7 +203,7 @@ const translations = {
     nav: {
       home: 'Home',
       home_station: 'Lengxi\'s Site',
-      home_nest: 'Lengxi\'s Dimensional Nest',
+      home_nest: 'Lengxi\'s ACG Nest',
       daily: 'Daily',
       projects: 'Projects',
       articles: 'Blog',
@@ -215,9 +216,9 @@ const translations = {
     profile: {
       role: 'Student · IT Major',
       location: 'Negeri Sembilan, Malaysia',
-      status: 'Lost interest in gaming, focused on tech.',
+      status: 'Paused main quest, grinding tech dungeons.',
       learning: 'Learning: Unity & C#',
-      bio: 'A tech enthusiast and otaku. Dreaming of developing my own open-world game one day. (´• ω •`)',
+      bio: 'Bouncing between tech and games, dreaming of building a high-freedom open world (´• ω •`)',
       message: 'Message',
       skills: 'Skills',
       online: 'Online'
@@ -279,7 +280,7 @@ const translations = {
       intro: 'This site is built with a modern frontend stack, aiming for a balance between minimalism and aesthetics.\nBoth the code and the interface design reflect my passion for technology.',
       tech_stack: 'Tech Stack',
       features: 'Features',
-      version: 'Current Version: v2.5.0 (Polished)'
+      version: 'Current Version: v2.5.2 (No Guestbook)'
     },
     settings: {
       title: 'Personalization',
@@ -473,9 +474,10 @@ const Hero = ({ hue, darkMode, t }) => {
   ];
 
   return (
+    // FIX: Changed h-[100svh] to h-screen to prevent layout jitter on mobile when address bar resizes
     <div className={`relative h-screen w-full flex flex-col justify-end items-center text-center px-4 overflow-hidden mb-8 pb-32`}>
       <div className={`z-10 relative flex flex-col items-center animate-fade-in-up`}> 
-        <div className="mb-10 min-h-[2rem]">
+        <div className="mb-10 min-h-[3rem] flex items-center">
            <Typewriter phrases={typewriterPhrases} hue={hue} darkMode={darkMode} />
         </div>
       </div>
@@ -495,11 +497,11 @@ const Hero = ({ hue, darkMode, t }) => {
 
 const RadarChart = ({ hue, darkMode, t }) => {
   const stats = [
-    { label: t('radar.coding'), value: 80 },
-    { label: t('radar.music'), value: 70 },
+    { label: t('radar.coding'), value: 65 }, 
+    { label: t('radar.music'), value: 75 }, 
     { label: t('radar.art'), value: 60 },
-    { label: t('radar.design'), value: 75 },
-    { label: t('radar.photo'), value: 65 },
+    { label: t('radar.design'), value: 50 }, 
+    { label: t('radar.photo'), value: 55 }, 
   ];
   const size = 200;
   const center = size / 2;
@@ -582,10 +584,16 @@ const InfoRow = ({ icon, label, value, isCopyable, hue, darkMode }) => {
         setTimeout(() => setCopied(false), 2000);
     }
 
+    let textColorClass = '';
+    if (isCopyable) {
+        textColorClass = darkMode ? 'text-gray-400' : 'text-gray-600';
+    } else {
+        textColorClass = darkMode ? 'text-gray-400' : 'text-gray-500';
+    }
+
     const containerClass = `flex items-center justify-between p-2 rounded-lg transition-colors group border border-transparent 
+      ${textColorClass}
       ${isCopyable ? 'cursor-pointer hover:bg-gray-100 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-gray-100' : ''}
-      ${!isCopyable && darkMode ? 'text-gray-400' : ''}
-      ${!isCopyable && !darkMode ? 'text-gray-500' : ''}
     `;
 
     return (
@@ -594,12 +602,12 @@ const InfoRow = ({ icon, label, value, isCopyable, hue, darkMode }) => {
             onClick={handleCopy}
             title={isCopyable ? "点击复制" : ""}
         >
-            <div className="flex items-center gap-3 overflow-hidden w-full">
-                <div className={`flex-shrink-0 w-6 flex justify-center ${isCopyable ? (darkMode ? 'text-gray-400 group-hover:text-gray-100' : 'text-gray-400 group-hover:text-gray-600') : (darkMode ? 'text-gray-500' : 'text-gray-400')} transition-colors`}>
+            <div className="flex items-start gap-3 w-full"> 
+                <div className={`flex-shrink-0 w-6 flex justify-center mt-0.5 ${isCopyable ? (darkMode ? 'text-gray-400 group-hover:text-gray-100' : 'text-gray-400 group-hover:text-gray-600') : (darkMode ? 'text-gray-500' : 'text-gray-400')} transition-colors`}>
                     {icon}
                 </div>
                 <div className="flex flex-col min-w-0">
-                    <span className={`text-sm font-medium truncate leading-tight pt-0.5`}>{value}</span>
+                    <span className={`text-sm font-medium leading-tight whitespace-normal break-words`}>{value}</span> 
                 </div>
             </div>
             {copied && <Check size={14} className="text-green-500 flex-shrink-0 ml-2 animate-in zoom-in" />}
@@ -638,7 +646,7 @@ const ProfileCardPro = ({ darkMode, hue, t }) => (
     <div className="px-5 pb-6 relative">
       <div className="-mt-16 mb-2 flex justify-start relative z-10">
          <div className="relative group/avatar cursor-pointer">
-             <div className={`w-24 h-24 rounded-full border-[4px] p-1 transition-all duration-500 transform hover:scale-110 hover:rotate-2 ${darkMode ? 'border-gray-900 bg-gray-800 shadow-gray-900/50' : 'border-white bg-white/50 backdrop-blur shadow-gray-200'}`}>
+             <div className={`w-24 h-24 rounded-full border-[4px] p-1 transition-all duration-500 transform hover:scale-110 hover:rotate-2 ${darkMode ? 'border-gray-500 bg-gray-800 shadow-gray-900/50' : 'border-white bg-white/50 backdrop-blur shadow-gray-200'}`}> 
                  <div className="w-full h-full rounded-full bg-gray-100 flex items-center justify-center overflow-hidden relative">
                      <img src={AVATAR_URL} alt="avatar" className="w-full h-full object-cover transition-transform duration-700 group-hover/avatar:scale-110" />
                      <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/0 to-white/30 opacity-0 group-hover:avatar:opacity-100 transition-opacity duration-500"></div>
@@ -654,19 +662,12 @@ const ProfileCardPro = ({ darkMode, hue, t }) => (
           <div className="flex justify-between items-start">
               <div>
                   <div className="flex items-center gap-2 mb-1">
-                      <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100">
+                      <h3 className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}> 
                         {t('common.profile_name')}
                       </h3>
                       <BadgeCheck size={18} className="text-blue-500" fill="currentColor" color="white" />
                   </div>
               </div>
-              
-              <button 
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-bold transition-all hover:scale-105 active:scale-95 shadow-sm ${darkMode ? 'bg-white text-gray-900 hover:bg-gray-100' : 'bg-gray-900 text-white hover:bg-gray-800'}`}
-              >
-                  <MessageSquare size={12} />
-                  {t('profile.message')}
-              </button>
           </div>
           
           <div className="mt-3">
@@ -769,7 +770,7 @@ const ArticleList = ({ darkMode, hue, lang }) => (
               </span>
             )}
             <h2 
-              className="text-2xl font-bold transition-colors cursor-pointer"
+              className={`text-2xl font-bold transition-colors cursor-pointer ${darkMode ? 'text-white' : 'text-gray-900'}`} 
             >
               <span className="bg-gradient-to-r bg-[length:0%_3px] bg-no-repeat bg-left-bottom hover:bg-[length:100%_3px] transition-all duration-300 pb-1" style={{ backgroundImage: `linear-gradient(${getThemeColor(hue, 1, 'dark')}, ${getThemeColor(hue, 1, 'dark')})`}}>
                 {lang === 'en' && post.title_en ? post.title_en : post.title}
@@ -815,7 +816,7 @@ const GithubBlogView = ({ darkMode, hue, t, lang }) => {
   const [loadingRepos, setLoadingRepos] = useState(true);
   const [loadingReadme, setLoadingReadme] = useState(false);
   const [showList, setShowList] = useState(true);
-  const [error, setError] = useState(null); // Add error state
+  const [error, setError] = useState(null); 
   const markedLoaded = useMarked();
 
   useEffect(() => {
@@ -912,7 +913,7 @@ const GithubBlogView = ({ darkMode, hue, t, lang }) => {
   return (
     <div className="flex flex-col animate-fade-in-content relative min-h-screen">
       <div className="md:hidden flex-none mb-4 flex items-center justify-between">
-          <h2 className="text-xl font-bold flex items-center gap-2">
+          <h2 className={`text-xl font-bold flex items-center gap-2 ${darkMode ? 'text-white' : 'text-gray-900'}`}> 
              <Code className="text-blue-500" /> {t('projects.title')}
           </h2>
           <button 
@@ -933,7 +934,9 @@ const GithubBlogView = ({ darkMode, hue, t, lang }) => {
          `}>
              <div className={`${glassCardClass(darkMode)} overflow-hidden flex flex-col max-h-[calc(100vh-8rem)]`}>
                 <div className={`p-4 border-b ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
-                    <h3 className="font-bold flex items-center gap-2"><FolderGit2 size={18}/> {t('projects.title')} <span className="text-xs opacity-50 bg-gray-200 dark:bg-gray-700 px-1.5 rounded-full">{repos.length}</span></h3>
+                    <h3 className={`font-bold flex items-center gap-2 ${darkMode ? 'text-white' : 'text-gray-900'}`}> 
+                      <FolderGit2 size={18}/> {t('projects.title')} <span className="text-xs opacity-50 bg-gray-200 dark:bg-gray-700 px-1.5 rounded-full">{repos.length}</span>
+                    </h3>
                 </div>
                 <div className="flex-1 overflow-y-auto p-2 space-y-2 custom-scrollbar">
                     {loadingRepos ? (
@@ -1012,10 +1015,10 @@ const GithubBlogView = ({ darkMode, hue, t, lang }) => {
                          </div>
 
                          <a 
-                            href={selectedRepo.html_url} 
-                            target="_blank" 
-                            rel="noreferrer"
-                            className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold transition-all hover:-translate-y-0.5 shadow-sm opacity-80 hover:opacity-100 ${darkMode ? 'bg-gray-800 hover:bg-gray-700 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'}`}
+                           href={selectedRepo.html_url} 
+                           target="_blank" 
+                           rel="noreferrer"
+                           className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold transition-all hover:-translate-y-0.5 shadow-sm opacity-80 hover:opacity-100 ${darkMode ? 'bg-gray-800 hover:bg-gray-700 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'}`}
                          >
                             <Github size={14}/> {t('github_reader.view_source')}
                          </a>
@@ -1070,26 +1073,20 @@ const Navbar = ({
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showColorPicker, setShowColorPicker] = useState(false);
-  // Replaced useState with useRef for DOM elements to avoid state mutation issues and ensure direct access
   const navButtonRefs = useRef({});
+  const navListRef = useRef(null);
   const [underlineStyle, setUnderlineStyle] = useState({ left: 0, width: 0, opacity: 0 });
   const pickerRef = useRef(null);
   
-  // Define fixed width for the underline
-  const FIXED_UNDERLINE_WIDTH = 58;
-
   const handleNavClick = (viewId) => {
-    // If clicking home (either from current page or other page), jump instantly past hero
     if (viewId === 'home') {
         if (currentView === 'home') {
-            // Toggle behavior if already on home
             if (window.scrollY < window.innerHeight / 2) {
                 window.scrollTo({ top: window.innerHeight - 80, behavior: 'smooth' });
             } else {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
         } else {
-            // If coming from another page, reset to top (Hero visible)
             setCurrentView('home');
             setTimeout(() => {
                 window.scrollTo({ top: window.innerHeight - 80, behavior: 'smooth' }); 
@@ -1101,7 +1098,7 @@ const Navbar = ({
     }
     setIsMenuOpen(false);
   };
-
+  
   const navItems = [
       { id: 'home', icon: <Home size={18}/>, label: t('nav.home') },
       { id: 'daily', icon: <Coffee size={18}/>, label: t('nav.daily') }, 
@@ -1111,19 +1108,22 @@ const Navbar = ({
       { id: 'about', icon: <User size={18}/>, label: t('nav.about') },
   ];
 
-  // Logic for sliding underline with FIXED width centered
   useEffect(() => {
     const updateUnderline = () => {
         const activeBtn = navButtonRefs.current[currentView];
-        if (activeBtn) {
-            // Calculate exact left position to center the fixed width underline under the button
-            // Center of button = offsetLeft + offsetWidth / 2
-            // Left of underline = Center of button - underlineWidth / 2
-            const leftPos = activeBtn.offsetLeft + (activeBtn.offsetWidth / 2) - (FIXED_UNDERLINE_WIDTH / 2);
+        const navList = navListRef.current;
+        
+        if (activeBtn && navList) {
+            const btnRect = activeBtn.getBoundingClientRect();
+            const navRect = navList.getBoundingClientRect();
+            
+            const fixedWidth = 58;
+            const btnCenterRelative = (btnRect.left - navRect.left) + (btnRect.width / 2);
+            const left = btnCenterRelative - (fixedWidth / 2);
             
             setUnderlineStyle({
-                left: leftPos,
-                width: FIXED_UNDERLINE_WIDTH,
+                left: left,
+                width: fixedWidth,
                 opacity: 1
             });
         } else {
@@ -1132,8 +1132,25 @@ const Navbar = ({
     };
 
     updateUnderline();
-    window.addEventListener('resize', updateUnderline);
-    return () => window.removeEventListener('resize', updateUnderline);
+
+    const resizeObserver = new ResizeObserver(() => {
+        updateUnderline();
+    });
+
+    if (navListRef.current) {
+        resizeObserver.observe(navListRef.current);
+    }
+
+    const onResize = () => requestAnimationFrame(updateUnderline);
+    window.addEventListener('resize', onResize);
+    
+    const timeoutId = setTimeout(updateUnderline, 100);
+
+    return () => {
+        resizeObserver.disconnect();
+        window.removeEventListener('resize', onResize);
+        clearTimeout(timeoutId);
+    };
   }, [currentView, t, lang]); 
 
   useEffect(() => {
@@ -1195,12 +1212,14 @@ const Navbar = ({
           </div>
 
           {/* Desktop Nav with Sliding Underline */}
-          <div className={`hidden md:flex items-center space-x-1 relative ${darkMode ? 'text-gray-200' : 'text-gray-600'}`}>
+          <div 
+            ref={navListRef}
+            className={`hidden md:flex items-center gap-1 relative ${darkMode ? 'text-gray-200' : 'text-gray-600'}`}
+          >
             {navItems.map((item) => (
                 <button
                     key={item.id}
                     ref={el => {
-                        // Store refs directly in the current object
                         if (el) navButtonRefs.current[item.id] = el;
                     }}
                     onClick={() => handleNavClick(item.id)}
@@ -1224,7 +1243,6 @@ const Navbar = ({
                     width: underlineStyle.width,
                     opacity: underlineStyle.opacity,
                     backgroundColor: getThemeColor(hue, 1, 'dark'),
-                    // Removed transform translateX(-50%) to rely on precise left calculation
                 }}
             />
           </div>
@@ -1275,20 +1293,20 @@ const Navbar = ({
                           <div className="grid grid-cols-2 gap-3 mb-5">
                               {DYNAMIC_PRESETS.map((bg, idx) => (
                                   <div key={idx} onClick={() => setBgConfig({...bgConfig, url: bg.url})} className={`h-16 rounded-xl cursor-pointer overflow-hidden border-2 relative group transition-all ${bgConfig.url === bg.url ? 'border-blue-500 shadow-md scale-[1.02]' : 'border-transparent hover:border-gray-200 dark:hover:border-gray-600'}`}>        
-                                              {bg.url === 'default' ? (
-                                                  <div className="w-full h-full bg-gradient-to-br from-pink-50 to-blue-50 dark:from-gray-700 dark:to-gray-600 flex flex-col items-center justify-center relative overflow-hidden">
-                                                      <div className="absolute top-[-20%] left-[-20%] w-[80%] h-[80%] rounded-full bg-blue-400/20 blur-md"></div>
-                                                      <div className="absolute bottom-[-20%] right-[-20%] w-[80%] h-[80%] rounded-full bg-pink-400/20 blur-md"></div>
-                                                      <span className="text-[10px] text-gray-600 dark:text-gray-300 font-bold relative z-10">{bg.name}</span>
-                                                  </div>
-                                                ) : (
-                                                  <div className="w-full h-full bg-black flex flex-col items-center justify-center relative overflow-hidden">
-                                                      <div className="absolute w-full h-full bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 opacity-80"></div>
-                                                      <span className="text-[10px] text-white font-bold relative z-10 drop-shadow-md">{bg.name}</span>
-                                                  </div>
-                                                )}
-                                                {bgConfig.url === bg.url && (<div className="absolute bottom-1.5 right-1.5 bg-blue-500 rounded-full p-[2px] shadow-sm flex items-center justify-center"><Check size={8} className="text-white" strokeWidth={3} /></div>)}
-                                  </div>
+                                                  {bg.url === 'default' ? (
+                                                      <div className="w-full h-full bg-gradient-to-br from-pink-50 to-blue-50 dark:from-gray-700 dark:to-gray-600 flex flex-col items-center justify-center relative overflow-hidden">
+                                                          <div className="absolute top-[-20%] left-[-20%] w-[80%] h-[80%] rounded-full bg-blue-400/20 blur-md"></div>
+                                                          <div className="absolute bottom-[-20%] right-[-20%] w-[80%] h-[80%] rounded-full bg-pink-400/20 blur-md"></div>
+                                                          <span className="text-[10px] text-gray-600 dark:text-gray-300 font-bold relative z-10">{bg.name}</span>
+                                                      </div>
+                                                  ) : (
+                                                      <div className="w-full h-full bg-black flex flex-col items-center justify-center relative overflow-hidden">
+                                                          <div className="absolute w-full h-full bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 opacity-80"></div>
+                                                          <span className="text-[10px] text-white font-bold relative z-10 drop-shadow-md">{bg.name}</span>
+                                                      </div>
+                                                  )}
+                                                  {bgConfig.url === bg.url && (<div className="absolute bottom-1.5 right-1.5 bg-blue-500 rounded-full p-[2px] shadow-sm flex items-center justify-center"><Check size={8} className="text-white" strokeWidth={3} /></div>)}
+                                      </div>
                               ))}
                           </div>
                           <span className="text-xs font-semibold text-gray-500 flex items-center gap-1 mb-3"><ImageIcon size={12}/> {t('settings.wallpaper')}</span>
@@ -1345,8 +1363,8 @@ const Navbar = ({
                     </button>
                ))}
                <div className="border-t my-2 border-gray-200 dark:border-gray-700"></div>
-               <button className="p-3 text-sm text-gray-500 flex justify-between cursor-default">冷汐的小站 <Check size={14} className="text-blue-500"/></button>
-               <button className="p-3 text-sm text-gray-400 flex justify-between cursor-not-allowed">冷汐的次元小窝</button>
+               <button className="p-3 text-sm text-gray-500 flex justify-between cursor-default">{t('nav.home_station')} <Check size={14} className="text-blue-500"/></button>
+               <button className="p-3 text-sm text-gray-400 flex justify-between cursor-not-allowed">{t('nav.home_nest')}</button>
           </div>
       )}
     </nav>
@@ -1354,6 +1372,98 @@ const Navbar = ({
 };
 
 // --- Page Views ---
+
+// 2. DailyView
+const DailyView = ({ hue, darkMode, t }) => (
+    <div className="flex flex-col gap-8 animate-fade-in-content">
+        <div className="flex items-center gap-3">
+             <div className="p-3 rounded-full bg-pink-100 dark:bg-pink-900/30 text-pink-500"><Camera size={24}/></div>
+             <div>
+                 <h2 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>{t('daily.gallery_title')}</h2>
+                 <p className="text-sm text-gray-400">{t('daily.gallery_desc')}</p>
+             </div>
+        </div>
+        <GalleryGrid darkMode={darkMode} hue={hue} t={t} />
+    </div>
+);
+
+// 3. LinksView
+const LinksView = ({ hue, darkMode, t }) => (
+    <div className="animate-fade-in-content">
+         <div className="text-center mb-10">
+             <h2 className={`text-3xl font-bold mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}>{t('links.title')}</h2>
+             <p className={`${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{t('links.desc')}</p>
+         </div>
+         
+         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+             {friendLinks.map((link, i) => (
+                 <a key={i} href={link.url} className={`flex items-center gap-4 p-4 rounded-2xl border transition-all hover:-translate-y-1 hover:shadow-lg ${darkMode ? 'bg-gray-800/50 border-gray-700 hover:bg-gray-800 text-gray-200' : 'bg-white/60 border-gray-200 hover:bg-white text-gray-800'}`}>
+                     <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-gray-100 dark:border-gray-600 flex-shrink-0">
+                         <img src={link.avatar} alt={link.name} className="w-full h-full object-cover" />
+                     </div>
+                     <div>
+                         <h3 className="font-bold text-lg mb-1">{link.name}</h3>
+                         <p className="text-xs opacity-70 line-clamp-2">{link.desc}</p>
+                     </div>
+                 </a>
+             ))}
+             {/* Apply Link Card */}
+             <div className={`flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border border-dashed cursor-pointer transition-colors ${darkMode ? 'border-gray-700 text-gray-500 hover:border-gray-500 hover:text-gray-300' : 'border-gray-300 text-gray-400 hover:border-gray-400 hover:text-gray-600'}`}>
+                 <Plus size={32} />
+                 <span className="text-sm font-medium">{t('links.apply')}</span>
+             </div>
+         </div>
+    </div>
+);
+
+// 4. AboutView
+const AboutView = ({ hue, darkMode, t }) => (
+    <div className="max-w-4xl mx-auto animate-fade-in-content">
+        <div className={`${glassCardClass(darkMode)} p-8 md:p-12`}>
+            <div className="mb-10 text-center md:text-left">
+                 <h1 className={`text-3xl font-bold mb-4 flex items-center gap-3 justify-center md:justify-start ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                    <Terminal size={32} className="text-blue-500"/> 
+                    {t('about.title')}
+                 </h1>
+                 <p className={`text-lg leading-relaxed whitespace-pre-line ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    {t('about.intro')}
+                 </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <section>
+                    <h3 className={`text-xl font-bold mb-4 flex items-center gap-2 border-b pb-2 ${darkMode ? 'border-gray-700 text-gray-100' : 'border-gray-200 text-gray-800'}`}>
+                        <Code size={20} className="text-blue-500"/> {t('about.tech_stack')}
+                    </h3>
+                    <ul className={`space-y-3 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                        <li className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-blue-400"></div>React 18 (Hooks & Functional Components)</li>
+                        <li className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-cyan-400"></div>Tailwind CSS (Utility-first Styling)</li>
+                        <li className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-orange-400"></div>Lucide React (Vector Icons)</li>
+                        <li className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-yellow-400"></div>JavaScript (ES6+)</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h3 className={`text-xl font-bold mb-4 flex items-center gap-2 border-b pb-2 ${darkMode ? 'border-gray-700 text-gray-100' : 'border-gray-200 text-gray-800'}`}>
+                        <Layout size={20} className="text-purple-500"/> {t('about.features')}
+                    </h3>
+                    <ul className={`space-y-3 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                        <li className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-purple-400"></div>Responsive Layout (Mobile First)</li>
+                        <li className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-pink-400"></div>Dark Mode Support</li>
+                        <li className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-green-400"></div>Glassmorphism Design</li>
+                        <li className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-indigo-400"></div>Custom Theme & Background</li>
+                    </ul>
+                </section>
+            </div>
+            
+            <div className={`mt-8 pt-6 border-t border-dashed ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+                <p className="text-center text-sm opacity-60">
+                    {t('about.version')}
+                </p>
+            </div>
+        </div>
+    </div>
+);
 
 // 1. HomeView
 const HomeView = ({ hue, darkMode, t, lang }) => (
@@ -1406,98 +1516,6 @@ const HomeView = ({ hue, darkMode, t, lang }) => (
                      </p>
                      <span className="text-xs text-gray-400">2025-01-20</span>
                  </div>
-            </div>
-        </div>
-    </div>
-);
-
-// 2. DailyView
-const DailyView = ({ hue, darkMode, t }) => (
-    <div className="flex flex-col gap-8 animate-fade-in-content">
-        <div className="flex items-center gap-3">
-             <div className="p-3 rounded-full bg-pink-100 dark:bg-pink-900/30 text-pink-500"><Camera size={24}/></div>
-             <div>
-                 <h2 className="text-2xl font-bold">{t('daily.gallery_title')}</h2>
-                 <p className="text-sm text-gray-400">{t('daily.gallery_desc')}</p>
-             </div>
-        </div>
-        <GalleryGrid darkMode={darkMode} hue={hue} t={t} />
-    </div>
-);
-
-// 3. LinksView
-const LinksView = ({ hue, darkMode, t }) => (
-    <div className="animate-fade-in-content">
-         <div className="text-center mb-10">
-             <h2 className={`text-3xl font-bold mb-4 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>{t('links.title')}</h2>
-             <p className={`${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{t('links.desc')}</p>
-         </div>
-         
-         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-             {friendLinks.map((link, i) => (
-                 <a key={i} href={link.url} className={`flex items-center gap-4 p-4 rounded-2xl border transition-all hover:-translate-y-1 hover:shadow-lg ${darkMode ? 'bg-gray-800/50 border-gray-700 hover:bg-gray-800 text-gray-200' : 'bg-white/60 border-gray-200 hover:bg-white text-gray-800'}`}>
-                     <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-gray-100 dark:border-gray-600 flex-shrink-0">
-                         <img src={link.avatar} alt={link.name} className="w-full h-full object-cover" />
-                     </div>
-                     <div>
-                         <h3 className="font-bold text-lg mb-1">{link.name}</h3>
-                         <p className="text-xs opacity-70 line-clamp-2">{link.desc}</p>
-                     </div>
-                 </a>
-             ))}
-             {/* Apply Link Card */}
-             <div className={`flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border border-dashed cursor-pointer transition-colors ${darkMode ? 'border-gray-700 text-gray-500 hover:border-gray-500 hover:text-gray-300' : 'border-gray-300 text-gray-400 hover:border-gray-400 hover:text-gray-600'}`}>
-                 <Plus size={32} />
-                 <span className="text-sm font-medium">{t('links.apply')}</span>
-             </div>
-         </div>
-    </div>
-);
-
-// 4. AboutView
-const AboutView = ({ hue, darkMode, t }) => (
-    <div className="max-w-4xl mx-auto animate-fade-in-content">
-        <div className={`${glassCardClass(darkMode)} p-8 md:p-12`}>
-            <div className="mb-10 text-center md:text-left">
-                 <h1 className="text-3xl font-bold mb-4 flex items-center gap-3 justify-center md:justify-start">
-                    <Terminal size={32} className="text-blue-500"/>
-                    {t('about.title')}
-                 </h1>
-                 <p className={`text-lg leading-relaxed whitespace-pre-line ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                    {t('about.intro')}
-                 </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <section>
-                    <h3 className={`text-xl font-bold mb-4 flex items-center gap-2 border-b pb-2 ${darkMode ? 'border-gray-700 text-gray-100' : 'border-gray-200 text-gray-800'}`}>
-                        <Code size={20} className="text-blue-500"/> {t('about.tech_stack')}
-                    </h3>
-                    <ul className={`space-y-3 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                        <li className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-blue-400"></div>React 18 (Hooks & Functional Components)</li>
-                        <li className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-cyan-400"></div>Tailwind CSS (Utility-first Styling)</li>
-                        <li className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-orange-400"></div>Lucide React (Vector Icons)</li>
-                        <li className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-yellow-400"></div>JavaScript (ES6+)</li>
-                    </ul>
-                </section>
-
-                <section>
-                    <h3 className={`text-xl font-bold mb-4 flex items-center gap-2 border-b pb-2 ${darkMode ? 'border-gray-700 text-gray-100' : 'border-gray-200 text-gray-800'}`}>
-                        <Layout size={20} className="text-purple-500"/> {t('about.features')}
-                    </h3>
-                    <ul className={`space-y-3 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                        <li className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-purple-400"></div>Responsive Layout (Mobile First)</li>
-                        <li className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-pink-400"></div>Dark Mode Support</li>
-                        <li className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-green-400"></div>Glassmorphism Design</li>
-                        <li className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-indigo-400"></div>Custom Theme & Background</li>
-                    </ul>
-                </section>
-            </div>
-            
-            <div className={`mt-8 pt-6 border-t border-dashed ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
-                <p className="text-center text-sm opacity-60">
-                    {t('about.version')}
-                </p>
             </div>
         </div>
     </div>
@@ -1561,7 +1579,7 @@ export default function App() {
           case 'home': return <HomeView hue={hue} darkMode={darkMode} t={t} lang={lang} />;
           case 'daily': return <DailyView hue={hue} darkMode={darkMode} t={t} />;
           case 'projects': return <GithubBlogView darkMode={darkMode} hue={hue} t={t} lang={lang} />;
-          case 'articles': return <div className="animate-fade-in-content"><h2 className="text-2xl font-bold mb-6 flex items-center gap-2"><Book/> {t('articles.title')}</h2><ArticleList darkMode={darkMode} hue={hue} lang={lang} /></div>;
+          case 'articles': return <div className="animate-fade-in-content"><h2 className={`text-2xl font-bold mb-6 flex items-center gap-2 ${darkMode ? 'text-white' : 'text-gray-900'}`}><Book/> {t('articles.title')}</h2><ArticleList darkMode={darkMode} hue={hue} lang={lang} /></div>; 
           case 'links': return <LinksView hue={hue} darkMode={darkMode} t={t} />;
           case 'about': return <AboutView hue={hue} darkMode={darkMode} t={t} />;
           default: return <HomeView hue={hue} darkMode={darkMode} t={t} lang={lang} />;
