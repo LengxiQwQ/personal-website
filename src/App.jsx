@@ -7,8 +7,15 @@ import {
   Heart, SkipForward, Palette, X, MapPin, GraduationCap,
   Zap, Mail, Check, Instagram, Gamepad2, Star, 
   Settings, Sparkles, Layout, FolderGit2, Loader2, Plus,
-  Code, Terminal, BadgeCheck, Camera, BookOpen, GitFork, Scale, Timer, AlertTriangle, Languages, Mail as MailIcon, Copy
+  Code, Terminal, BadgeCheck, Camera, BookOpen, GitFork, Scale, Timer, AlertTriangle, Languages, Mail as MailIcon, Copy,
+  Send, MessageSquare, MoreHorizontal
 } from 'lucide-react';
+// 引入 Twikoo
+import twikoo from 'twikoo';
+
+// --- 配置区域 ---
+// ✅ 正确的 Netlify Twikoo 云函数地址
+const TWIKOO_ENV_ID = "https://lengxi-website.netlify.app/.netlify/functions/twikoo"; 
 
 // --- Hook: Load marked.js dynamically ---
 const useMarked = () => {
@@ -26,7 +33,7 @@ const useMarked = () => {
   return loaded;
 };
 
-// --- Global Styles ---
+// --- Global Styles & Twikoo Custom Styles ---
 const GlobalStyles = ({ hue, darkMode }) => (
   <style>{`
     @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap');
@@ -88,6 +95,62 @@ const GlobalStyles = ({ hue, darkMode }) => (
     .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(156, 163, 175, 0.5); border-radius: 3px; }
     .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(156, 163, 175, 0.8); }
+
+    /* ========================================= */
+    /* --- Twikoo 强制样式覆盖 (防止看不见) --- */
+    /* ========================================= */
+    
+    .tk-main {
+      font-family: 'Nunito', sans-serif !important;
+      position: relative;
+      z-index: 10;
+    }
+    
+    /* 输入框区域背景和文字颜色 */
+    .el-input__inner, .el-textarea__inner {
+      background-color: ${darkMode ? 'rgba(31, 41, 55, 0.6)' : 'rgba(255, 255, 255, 0.8)'} !important;
+      border: 1px solid ${darkMode ? 'rgba(75, 85, 99, 0.5)' : 'rgba(229, 231, 235, 1)'} !important;
+      color: ${darkMode ? '#e5e7eb' : '#374151'} !important;
+      border-radius: 8px !important;
+    }
+    
+    /* 评论列表卡片 */
+    .tk-content {
+      color: ${darkMode ? '#d1d5db' : '#4b5563'} !important;
+      font-size: 0.9rem !important;
+    }
+    .tk-comment {
+        margin-top: 1rem !important;
+        padding: 12px !important;
+        border-radius: 12px !important;
+        background: ${darkMode ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)'} !important;
+        border: 1px solid ${darkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'} !important;
+    }
+
+    /* 提交按钮 - 强制显色 */
+    .tk-submit {
+      background: ${darkMode ? '#3b82f6' : '#2563eb'} !important;
+      color: #ffffff !important;
+      border-radius: 8px !important;
+      padding: 0 20px !important;
+      border: none !important;
+      cursor: pointer !important;
+    }
+    
+    /* 头像 */
+    .tk-avatar {
+        border-radius: 50% !important;
+        border: 2px solid ${darkMode ? '#374151' : '#fff'} !important;
+    }
+    
+    /* 昵称颜色 */
+    .tk-nick { color: ${darkMode ? '#60a5fa' : '#2563eb'} !important; font-weight: bold !important; }
+    
+    /* 预览和表情框 */
+    .tk-owo-emotion { width: auto !important; max-width: 100% !important; }
+    
+    /* 隐藏版权信息 (可选) */
+    .tk-footer { opacity: 0.4; font-size: 0.75rem; margin-top: 20px; text-align: center; }
   `}</style>
 );
 
@@ -116,7 +179,7 @@ const translations = {
       location: '马来西亚，森美兰州',
       status: '暂时放弃游戏主线任务，转为狂刷技术副本',
       learning: '正在钻研：Unity & C#',
-      bio: '在技术与游戏之间反复横跳，梦想是打造自由度拉满的开放世界(´• ω •`)',
+      bio: '你好呀，我是冷汐。在技术与游戏之间反复横跳，梦想是打造自由度拉满的开放世界游戏 (´• ω •`)',
       message: '留言', 
       skills: '技能分布',
       online: '在线'
@@ -182,7 +245,7 @@ const translations = {
       intro: '本站是一个基于现代前端技术栈构建的个人展示空间。设计上追求极简与美观的平衡，交互上注重流畅与响应式体验。\n无论是代码的编写还是界面的打磨，都倾注了对技术的热爱。',
       tech_stack: '技术栈',
       features: '设计特性',
-      version: '当前版本：v2.5.7 (Final Polish)'
+      version: '当前版本：v2.5.9 (Final)'
     },
     settings: {
       title: '个性化设置',
@@ -198,6 +261,9 @@ const translations = {
     footer: {
       copyright: '© 2025 冷汐OωO 版权所有',
       motto: '冷汐OωO 的次元小窝'
+    },
+    guestbook: {
+      title: '留言板'
     }
   },
   en: {
@@ -208,7 +274,7 @@ const translations = {
     nav: {
       home: 'Home',
       home_station: 'Lengxi\'s Site',
-      home_nest: 'Dimensional Nest',
+      home_nest: 'ACG Nest',
       daily: 'Daily',
       projects: 'Projects',
       articles: 'Blog',
@@ -223,7 +289,7 @@ const translations = {
       location: 'Negeri Sembilan, Malaysia',
       status: 'Paused main quest, grinding tech dungeons.',
       learning: 'Learning: Unity & C#',
-      bio: 'Bouncing between tech and games, dreaming of building a high-freedom open world (´• ω •`)',
+      bio: 'Hello, I\'m Lengxi. Bouncing between tech and games, dreaming of building a high-freedom open world game (´• ω •`)',
       message: 'Message',
       skills: 'Skills',
       online: 'Online'
@@ -289,7 +355,7 @@ const translations = {
       intro: 'This site is built with a modern frontend stack, aiming for a balance between minimalism and aesthetics.\nBoth the code and the interface design reflect my passion for technology.',
       tech_stack: 'Tech Stack',
       features: 'Features',
-      version: 'Current Version: v2.5.7 (Final Polish)'
+      version: 'Current Version: v2.5.9 (Final)'
     },
     settings: {
       title: 'Personalization',
@@ -305,6 +371,9 @@ const translations = {
     footer: {
       copyright: '© 2025 LengxiOωO All Rights Reserved',
       motto: 'LengxiOωO\'s Dimensional Nest'
+    },
+    guestbook: {
+      title: 'Guestbook'
     }
   }
 };
@@ -532,6 +601,7 @@ const RadarChart = ({ hue, darkMode, t }) => {
   );
 };
 
+// InfoRow 统一改为 text-xs (12px)
 const InfoRow = ({ icon, label, value, isCopyable, hue, darkMode }) => {
     const [copied, setCopied] = useState(false);
     const handleCopy = () => {
@@ -564,7 +634,7 @@ const InfoRow = ({ icon, label, value, isCopyable, hue, darkMode }) => {
                     {icon}
                 </div>
                 <div className="flex flex-col min-w-0">
-                    <span className={`text-sm font-medium leading-tight whitespace-normal break-words`}>{value}</span> 
+                    <span className={`text-xs font-medium leading-tight whitespace-normal break-words`}>{value}</span> 
                 </div>
             </div>
             {copied && <Check size={14} className="text-green-500 flex-shrink-0 ml-2 animate-in zoom-in" />}
@@ -572,12 +642,13 @@ const InfoRow = ({ icon, label, value, isCopyable, hue, darkMode }) => {
     )
 }
 
+// SocialLink 尺寸减小
 const SocialLink = ({ href, icon, color, hue, darkMode }) => (
     <a 
       href={href} 
       target="_blank" 
       rel="noopener noreferrer"
-      className={`w-10 h-10 flex items-center justify-center rounded-full transition-all duration-300 hover:scale-110 shadow-sm hover:shadow-md 
+      className={`w-8 h-8 flex items-center justify-center rounded-full transition-all duration-300 hover:scale-110 shadow-sm hover:shadow-md 
         ${darkMode ? 'bg-gray-800 text-gray-400 hover:text-white border border-gray-700' : 'bg-white text-gray-500 hover:text-white'}`}
       style={{ '--hover-bg': color || getThemeColor(hue, 1, 'dark') }}
       onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = e.currentTarget.style.getPropertyValue('--hover-bg'); e.currentTarget.style.color = 'white'; }}
@@ -628,7 +699,7 @@ const ProfileCardPro = ({ darkMode, hue, t }) => (
           </div>
           
           <div className="mt-3">
-              <p className={`text-sm leading-relaxed ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+              <p className={`text-xs leading-relaxed ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                   {t('profile.bio')}
               </p>
           </div>
@@ -646,12 +717,13 @@ const ProfileCardPro = ({ darkMode, hue, t }) => (
           <InfoRow icon={<Mail size={14} />} value="date200325@gmail.com" isCopyable={true} hue={hue} darkMode={darkMode} />
       </div>
 
-      <div className="mb-6 flex justify-center gap-3 flex-wrap">
+      {/* 社交图标：justify-between, w-8 h-8, icon size 16 */}
+      <div className="mb-6 flex justify-between items-center px-1">
             {SOCIAL_LINKS.map((link, i) => (
                  <SocialLink 
                     key={i}
                     href={link.href}
-                    icon={React.cloneElement(link.icon, { size: 20 + (link.sizeOffset || 0), strokeWidth: 2 })}
+                    icon={React.cloneElement(link.icon, { size: 16, strokeWidth: 2 })}
                     color={link.color}
                     hue={hue}
                     darkMode={darkMode}
@@ -713,6 +785,61 @@ const StatCard = ({ darkMode, hue, t }) => {
       </div>
     </div>
   );
+};
+
+// --- Twikoo Guestbook Component ---
+// ⚠️ 稳健版组件：防止重复初始化、处理报错
+const Guestbook = ({ darkMode, hue, t }) => {
+    const initialized = useRef(false);
+    const [status, setStatus] = useState('loading'); // loading, success, error
+
+    useEffect(() => {
+        if (initialized.current) return;
+        
+        // 延迟一帧，确保 DOM 已经完全挂载
+        requestAnimationFrame(() => {
+            const container = document.getElementById('tcomment');
+            if (container) {
+                initialized.current = true;
+                
+                try {
+                    twikoo.init({
+                        envId: TWIKOO_ENV_ID,
+                        el: '#tcomment',
+                        // lang: 'zh-CN', // 可选：强制中文
+                    }).then(() => {
+                        console.log('Twikoo init success');
+                        setStatus('success');
+                    }).catch(err => {
+                        console.error('Twikoo init error:', err);
+                        setStatus('error');
+                    });
+                } catch (e) {
+                    console.error("Twikoo crash:", e);
+                    setStatus('error');
+                }
+            }
+        });
+    }, []);
+
+    return (
+        <div className={`${glassCardClass(darkMode)} flex flex-col`}>
+            {/* 标题 */}
+            <div className={`p-4 border-b flex justify-between items-center ${darkMode ? 'border-gray-700/50' : 'border-gray-100'}`}>
+               <h3 className="font-bold flex items-center gap-2 text-sm">
+                 <MessageSquare size={16} className="text-pink-500"/> {t('guestbook.title')}
+               </h3>
+               {status === 'loading' && <span className="text-[10px] text-gray-400 flex items-center gap-1"><Loader2 className="animate-spin" size={10}/> Connecting...</span>}
+               {status === 'success' && <span className="text-[10px] px-2 py-0.5 rounded-full bg-pink-100 dark:bg-pink-900/30 text-pink-500 font-bold">Live</span>}
+               {status === 'error' && <span className="text-[10px] text-red-500 font-bold">Connection Failed</span>}
+            </div>
+
+            {/* Twikoo 挂载点 */}
+            <div className="p-4 relative" style={{ minHeight: '200px' }}>
+                <div id="tcomment"></div>
+            </div>
+        </div>
+    );
 };
 
 // --- ArticleList ---
@@ -938,8 +1065,8 @@ const GithubBlogView = ({ darkMode, hue, t, lang }) => {
                      </div>
 
                      <div 
-                        className={`markdown-body ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}
-                        dangerouslySetInnerHTML={{ __html: getHtmlContent() }}
+                       className={`markdown-body ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}
+                       dangerouslySetInnerHTML={{ __html: getHtmlContent() }}
                      />
                      
                      <div className="mt-16 pt-8 border-t border-dashed border-gray-200 dark:border-gray-800 text-center">
@@ -973,19 +1100,15 @@ const Navbar = ({
   const pickerRef = useRef(null);
   
   const handleNavClick = (viewId) => {
-    // 【关键修复2】首页动画逻辑修正
     if (viewId === 'home') {
         if (currentView === 'home') {
-            // 如果已经在首页，保留“反复横跳”的趣味功能
             if (window.scrollY < window.innerHeight / 2) {
                 window.scrollTo({ top: window.innerHeight - 80, behavior: 'smooth' });
             } else {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
         } else {
-            // 如果从其他页面点首页，直接切换并回到顶部（像普通页面切换一样）
             setCurrentView('home');
-            // 延时一点点让页面渲染完后滚动到内容区（跳过Hero）
             setTimeout(() => {
                 window.scrollTo({ top: window.innerHeight - 80, behavior: 'smooth' }); 
             }, 10);
@@ -1071,42 +1194,42 @@ const Navbar = ({
         <div className="flex justify-between items-center h-16">
           {/* Left: Avatar + Brand + Dropdown Container */}
           <div className="flex-shrink-0 flex items-center gap-3 relative group">
-             <a href="https://lengxi.xyz" className="cursor-pointer relative">
-                 <div className="relative w-10 h-10 rounded-full p-[2px]" style={{ background: 'conic-gradient(from 0deg, #4285F4 0deg 110deg, #EA4335 110deg 240deg, #FBBC05 240deg 300deg, #34A853 300deg 360deg)' }}>
+              <a href="https://lengxi.xyz" className="cursor-pointer relative">
+                  <div className="relative w-10 h-10 rounded-full p-[2px]" style={{ background: 'conic-gradient(from 0deg, #4285F4 0deg 110deg, #EA4335 110deg 240deg, #FBBC05 240deg 300deg, #34A853 300deg 360deg)' }}>
                     <div className={`w-full h-full rounded-full overflow-hidden ${darkMode ? 'bg-gray-900' : 'bg-white'} p-[1.5px] transition-transform duration-700 group-hover:scale-105`}>
                         <img src={AVATAR_URL} alt="Logo" className="w-full h-full object-cover rounded-full" />
                     </div>
-                 </div>
-             </a>
-             
-             {/* Text Trigger */}
-             <div className="h-16 flex items-center cursor-pointer">
-                 <span className={`font-bold text-xl tracking-wide ${darkMode ? 'text-white' : 'text-gray-800'}`}>
+                  </div>
+              </a>
+              
+              {/* Text Trigger */}
+              <div className="h-16 flex items-center cursor-pointer">
+                  <span className={`font-bold text-xl tracking-wide ${darkMode ? 'text-white' : 'text-gray-800'}`}>
                     {t('common.name')}
-                 </span>
-                 <ChevronDown size={16} className={`ml-1 opacity-50 group-hover:opacity-100 transition-opacity ${darkMode ? 'text-white' : 'text-gray-800'}`}/>
-             </div>
+                  </span>
+                  <ChevronDown size={16} className={`ml-1 opacity-50 group-hover:opacity-100 transition-opacity ${darkMode ? 'text-white' : 'text-gray-800'}`}/>
+              </div>
 
-             {/* Centered Dropdown Menu */}
-             <div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 w-56 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top z-50">
-                 <div className={`rounded-xl shadow-lg overflow-hidden border p-1 backdrop-blur-xl ${darkMode ? 'bg-gray-800/90 border-gray-700' : 'bg-white/90 border-gray-200'}`}>
-                     {/* Static Station Item (Default Checked) */}
-                     <div 
-                         className={`w-full text-left px-4 py-3 rounded-lg text-sm transition-colors flex justify-between items-center cursor-default ${darkMode ? 'bg-white/5 text-gray-200' : 'bg-gray-50 text-gray-800'}`}
-                     >
-                         {t('nav.home_station')}
-                         <Check size={14} className="text-blue-500" />
-                     </div>
-                     
-                     {/* Static Nest Item (Renamed, Disabled Link, No Check) */}
-                     <div 
-                         className={`w-full text-left px-4 py-3 rounded-lg text-sm transition-colors flex justify-between items-center cursor-not-allowed opacity-60 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}
-                         title="Coming Soon"
-                     >
-                         {t('nav.home_nest')}
-                     </div>
-                 </div>
-             </div>
+              {/* Centered Dropdown Menu */}
+              <div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 w-56 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top z-50">
+                  <div className={`rounded-xl shadow-lg overflow-hidden border p-1 backdrop-blur-xl ${darkMode ? 'bg-gray-800/90 border-gray-700' : 'bg-white/90 border-gray-200'}`}>
+                      {/* Static Station Item (Default Checked) */}
+                      <div 
+                          className={`w-full text-left px-4 py-3 rounded-lg text-sm transition-colors flex justify-between items-center cursor-default ${darkMode ? 'bg-white/5 text-gray-200' : 'bg-gray-50 text-gray-800'}`}
+                      >
+                          {t('nav.home_station')}
+                          <Check size={14} className="text-blue-500" />
+                      </div>
+                      
+                      {/* Static Nest Item (Renamed, Disabled Link, No Check) */}
+                      <div 
+                          className={`w-full text-left px-4 py-3 rounded-lg text-sm transition-colors flex justify-between items-center cursor-not-allowed opacity-60 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}
+                          title="Coming Soon"
+                      >
+                          {t('nav.home_nest')}
+                      </div>
+                  </div>
+              </div>
           </div>
 
           {/* Desktop Nav with Sliding Underline */}
@@ -1191,19 +1314,19 @@ const Navbar = ({
                           <div className="grid grid-cols-2 gap-3 mb-5">
                               {DYNAMIC_PRESETS.map((bg, idx) => (
                                   <div key={idx} onClick={() => setBgConfig({...bgConfig, url: bg.url})} className={`h-16 rounded-xl cursor-pointer overflow-hidden border-2 relative group transition-all ${bgConfig.url === bg.url ? 'border-blue-500 shadow-md scale-[1.02]' : 'border-transparent hover:border-gray-200 dark:hover:border-gray-600'}`}>        
-                                                  {bg.url === 'default' ? (
-                                                      <div className="w-full h-full bg-gradient-to-br from-pink-50 to-blue-50 dark:from-gray-700 dark:to-gray-600 flex flex-col items-center justify-center relative overflow-hidden">
-                                                          <div className="absolute top-[-20%] left-[-20%] w-[80%] h-[80%] rounded-full bg-blue-400/20 blur-md"></div>
-                                                          <div className="absolute bottom-[-20%] right-[-20%] w-[80%] h-[80%] rounded-full bg-pink-400/20 blur-md"></div>
-                                                          <span className="text-[10px] text-gray-600 dark:text-gray-300 font-bold relative z-10">{bg.name}</span>
-                                                      </div>
-                                                  ) : (
-                                                      <div className="w-full h-full bg-black flex flex-col items-center justify-center relative overflow-hidden">
-                                                          <div className="absolute w-full h-full bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 opacity-80"></div>
-                                                          <span className="text-[10px] text-white font-bold relative z-10 drop-shadow-md">{bg.name}</span>
-                                                      </div>
-                                                  )}
-                                                  {bgConfig.url === bg.url && (<div className="absolute bottom-1.5 right-1.5 bg-blue-500 rounded-full p-[2px] shadow-sm flex items-center justify-center"><Check size={8} className="text-white" strokeWidth={3} /></div>)}
+                                      {bg.url === 'default' ? (
+                                          <div className="w-full h-full bg-gradient-to-br from-pink-50 to-blue-50 dark:from-gray-700 dark:to-gray-600 flex flex-col items-center justify-center relative overflow-hidden">
+                                              <div className="absolute top-[-20%] left-[-20%] w-[80%] h-[80%] rounded-full bg-blue-400/20 blur-md"></div>
+                                              <div className="absolute bottom-[-20%] right-[-20%] w-[80%] h-[80%] rounded-full bg-pink-400/20 blur-md"></div>
+                                              <span className="text-[10px] text-gray-600 dark:text-gray-300 font-bold relative z-10">{bg.name}</span>
+                                          </div>
+                                      ) : (
+                                          <div className="w-full h-full bg-black flex flex-col items-center justify-center relative overflow-hidden">
+                                              <div className="absolute w-full h-full bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 opacity-80"></div>
+                                              <span className="text-[10px] text-white font-bold relative z-10 drop-shadow-md">{bg.name}</span>
+                                          </div>
+                                      )}
+                                      {bgConfig.url === bg.url && (<div className="absolute bottom-1.5 right-1.5 bg-blue-500 rounded-full p-[2px] shadow-sm flex items-center justify-center"><Check size={8} className="text-white" strokeWidth={3} /></div>)}
                                   </div>
                               ))}
                           </div>
@@ -1247,10 +1370,9 @@ const Navbar = ({
       </div>
       
       {/* Mobile Nav Dropdown */}
-      {/* 【关键修复1】修正手机竖屏模式下菜单模糊效果 */}
       {isMenuOpen && (
-          <div className={`md:hidden absolute top-16 left-0 w-full border-b shadow-lg p-4 flex flex-col gap-2 backdrop-blur-xl animate-fade-in z-50
-            ${darkMode ? 'bg-gray-900/70 border-gray-800' : 'bg-white/70 border-white/50'}`}
+          <div className={`md:hidden absolute top-16 left-0 w-full border-b shadow-lg p-4 flex flex-col gap-2 animate-fade-in z-50
+            ${darkMode ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200'}`}
           >
                {navItems.map((item) => (
                     <button
@@ -1287,7 +1409,6 @@ const DailyView = ({ hue, darkMode, t }) => (
 );
 
 // 3. LinksView
-// 【关键修复3】友链申请改版：点击复制 + 邮件唤起
 const LinksView = ({ hue, darkMode, t }) => {
     const [copied, setCopied] = useState(false);
 
@@ -1379,60 +1500,116 @@ const AboutView = ({ hue, darkMode, t }) => (
     </div>
 );
 
-// 1. HomeView
+// 1. HomeView (Refactored Layout: Left - Center - Right)
 const HomeView = ({ hue, darkMode, t, lang }) => (
-    <div className="flex flex-col lg:flex-row gap-8 animate-fade-in-content">
-        <div className="w-full lg:w-[28%] flex-shrink-0 space-y-6">
-            <ProfileCardPro darkMode={darkMode} hue={hue} t={t} />
-            <StatCard darkMode={darkMode} hue={hue} t={t} />
-             <div className={`${glassCardClass(darkMode)} p-6`}>
-                <h4 className="font-bold flex items-center gap-2 mb-4">
-                  <Tag size={18} className="text-blue-400"/> {t('home.tags_title')}
-                </h4>
-                <div className="flex flex-wrap gap-2">
-                   {['React', 'Genshin', 'Music', 'Coding', 'Steam', 'Anime', 'Design', 'Next.js', 'TypeScript'].map(t => (
-                       <span key={t} className={`text-xs px-3 py-1.5 rounded-lg cursor-pointer transition-all hover:text-white hover:scale-105 ${darkMode ? 'bg-gray-700/50' : 'bg-gray-100/80'}`} style={{ '--hover-bg': getThemeColor(hue, 1, 'dark') }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = getThemeColor(hue, 1, 'dark')} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = ''}>{t}</span>
-                   ))}
-                </div>
-            </div>
+  <div className="flex flex-col lg:flex-row gap-6 animate-fade-in-content items-start">
+    
+    {/* --- 左侧栏 (Profile, Tags) --- */}
+    <div className="w-full lg:w-[25%] flex-shrink-0 flex flex-col gap-6">
+      <ProfileCardPro darkMode={darkMode} hue={hue} t={t} />
+      
+      <div className={`${glassCardClass(darkMode)} p-6`}>
+        <h4 className="font-bold flex items-center gap-2 mb-4">
+          <Tag size={18} className="text-blue-400" /> {t('home.tags_title')}
+        </h4>
+        <div className="flex flex-wrap gap-2">
+          {['React', 'Genshin', 'Music', 'Coding', 'Steam', 'Anime', 'Design', 'Next.js', 'TypeScript'].map(tag => (
+            <span 
+              key={tag} 
+              className={`text-xs px-3 py-1.5 rounded-lg cursor-pointer transition-all hover:text-white hover:scale-105 ${darkMode ? 'bg-gray-700/50' : 'bg-gray-100/80'}`} 
+              style={{ '--hover-bg': getThemeColor(hue, 1, 'dark') }} 
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = getThemeColor(hue, 1, 'dark')} 
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = ''}
+            >
+              {tag}
+            </span>
+          ))}
         </div>
-        <div className="w-full lg:w-[72%] flex flex-col gap-6">
-            {/* Welcome */}
-            <div className={`${glassCardClass(darkMode)} p-8 relative overflow-hidden`}>
-                <div className="relative z-10">
-                    <h2 className="text-2xl font-bold mb-4">{t('home.welcome_title')}</h2>
-                    <p className={`leading-relaxed whitespace-pre-line ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                        {t('home.welcome_text')}
-                    </p>
-                </div>
-                <div className="absolute right-0 bottom-0 opacity-10 transform translate-x-1/4 translate-y-1/4">
-                    <Sparkles size={200} />
-                </div>
-            </div>
-            
-            {/* Recommendations */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                 <div className={`${glassCardClass(darkMode)} p-6 hover:shadow-lg transition-all cursor-pointer`}>
-                     <div className="flex items-center gap-2 mb-3 text-blue-500 font-bold text-sm"><Star size={14}/> {t('home.rec_project')}</div>
-                     <h3 className="text-lg font-bold mb-2">Mizuki OS (Web)</h3>
-                     <p className={`text-sm mb-4 line-clamp-2 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                        {lang === 'en' ? 'A web-based anime-style mock operating system.' : '一个运行在浏览器里的二次元风格模拟操作系统。'}
-                     </p>
-                     <div className="flex gap-2">
-                        {["React", "TypeScript"].map(t => <span key={t} className="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">{t}</span>)}
-                     </div>
-                 </div>
-                 <div className={`${glassCardClass(darkMode)} p-6 hover:shadow-lg transition-all cursor-pointer`}>
-                     <div className="flex items-center gap-2 mb-3 text-green-500 font-bold text-sm"><FileText size={14}/> {t('home.latest_article')}</div>
-                     <h3 className="text-lg font-bold mb-2">{lang === 'en' ? 'Markdown Guide & Test' : 'Markdown 编写指南与测试'}</h3>
-                     <p className={`text-sm mb-4 line-clamp-2 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                        {lang === 'en' ? 'A simple Markdown note example testing headers...' : '这是一个简单的 Markdown 笔记示例...'}
-                     </p>
-                     <span className="text-xs text-gray-400">2025-01-20</span>
-                 </div>
-            </div>
-        </div>
+      </div>
     </div>
+
+    {/* --- 中间栏 (Article Placeholder) --- */}
+    <div className="w-full lg:w-[50%] flex flex-col gap-6 min-w-0">
+      
+      {/* 示例文章卡片 */}
+      <div className={`${glassCardClass(darkMode)} group overflow-hidden hover:shadow-xl transition-all duration-300`}>
+        {/* 文章封面图 */}
+        <div className="h-64 w-full overflow-hidden relative">
+           <img 
+             src="https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800&auto=format&fit=crop" 
+             alt="Article Cover" 
+             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+           />
+           <div className="absolute top-4 left-4 bg-white/90 dark:bg-black/60 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold shadow-sm">
+             ☕️ 生活随笔
+           </div>
+        </div>
+
+        <div className="p-6 md:p-8">
+          <div className="flex items-center gap-3 text-xs text-gray-400 mb-3">
+            <span className="flex items-center gap-1"><Calendar size={12}/> 2026-01-09</span>
+            <span className="w-1 h-1 rounded-full bg-gray-300"></span>
+            <span className="flex items-center gap-1"><Clock size={12}/> 5 min read</span>
+          </div>
+
+          <h2 className={`text-2xl font-bold mb-4 leading-snug cursor-pointer transition-colors ${darkMode ? 'text-gray-100 group-hover:text-blue-400' : 'text-gray-800 group-hover:text-blue-600'}`}>
+            在无尽的构建中寻找秩序：我的重构日记
+          </h2>
+
+          <p className={`mb-6 line-clamp-3 leading-relaxed ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+            重构不仅仅是代码的清理，更是一种思维的重塑。当我们把旧的逻辑拆解，重新赋予它们新的结构时，仿佛也在梳理自己杂乱的思绪。在这篇文章中，我将分享我在重构首页布局时的心路历程，以及遇到的那些“坑”...
+          </p>
+
+          <div className="flex items-center justify-between">
+             <div className="flex -space-x-2">
+                {/* 模拟点赞头像 */}
+                {[1,2,3].map(i => (
+                  <div key={i} className={`w-8 h-8 rounded-full border-2 ${darkMode ? 'border-gray-800' : 'border-white'} overflow-hidden`}>
+                    <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${i}`} alt="user" className="w-full h-full object-cover"/>
+                  </div>
+                ))}
+                <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center text-[10px] font-bold ${darkMode ? 'border-gray-800 bg-gray-700' : 'border-white bg-gray-100'}`}>+12</div>
+             </div>
+             
+             <button className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold transition-all ${darkMode ? 'bg-white/10 hover:bg-white/20 text-white' : 'bg-black/5 hover:bg-black/10 text-gray-800'}`}>
+                阅读全文 <SkipForward size={14}/>
+             </button>
+          </div>
+        </div>
+      </div>
+
+      {/* 这里可以继续放更多文章卡片 */}
+      <div className={`p-8 rounded-3xl border border-dashed flex flex-col items-center justify-center text-center gap-2 opacity-50 ${darkMode ? 'border-gray-700 text-gray-500' : 'border-gray-300 text-gray-400'}`}>
+         <Coffee size={32}/>
+         <span>更多内容正在酝酿中...</span>
+      </div>
+
+    </div>
+
+    {/* --- 右侧栏 (Welcome, Stats, Guestbook) --- */}
+    <div className="w-full lg:w-[25%] flex-shrink-0 flex flex-col gap-6">
+      
+      {/* 1. 欢迎语卡片 */}
+      <div className={`${glassCardClass(darkMode)} p-6 relative overflow-hidden group`}>
+        <div className="relative z-10">
+          <h2 className="text-xl font-bold mb-3">{t('home.welcome_title')}</h2>
+          <p className={`text-sm leading-relaxed whitespace-pre-line ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+            {t('home.welcome_text')}
+          </p>
+        </div>
+        <div className="absolute -right-4 -bottom-4 opacity-10 transform rotate-12 transition-transform group-hover:scale-110 duration-700">
+          <Sparkles size={120} />
+        </div>
+      </div>
+
+      {/* 2. 站点信息卡片 (StatCard) */}
+      <StatCard darkMode={darkMode} hue={hue} t={t} />
+
+      {/* 3. 留言板功能框 (Twikoo Integration) */}
+      <Guestbook darkMode={darkMode} hue={hue} t={t} />
+
+    </div>
+  </div>
 );
 
 // --- Main App ---
@@ -1541,14 +1718,14 @@ export default function App() {
         darkMode={darkMode} 
         toggleDarkMode={toggleDarkMode} 
         hue={hue} 
-        setHue={setHue}
-        bgConfig={bgConfig}
-        setBgConfig={setBgConfig}
-        currentView={currentView}
-        setCurrentView={setCurrentView}
-        lang={lang}
-        setLang={setLang}
-        t={t}
+        setHue={setHue} 
+        bgConfig={bgConfig} 
+        setBgConfig={setBgConfig} 
+        currentView={currentView} 
+        setCurrentView={setCurrentView} 
+        lang={lang} 
+        setLang={setLang} 
+        t={t} 
       />
         
       {currentView === 'home' && <Hero hue={hue} darkMode={darkMode} t={t} />}
