@@ -33,11 +33,15 @@ const GlobalStyles = ({ hue, darkMode }) => (
     @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap');
     
     html {
+      /* 【修复抽搐关键点1】强制显示滚动条轨道，防止页面因内容变化导致的左右跳动 */
+      overflow-y: scroll; 
       scrollbar-gutter: stable;
     }
 
     body {
       font-family: 'Nunito', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      /* 防止 iOS 回弹效果导致的背景露白 */
+      overscroll-behavior-y: none;
     }
     
     @keyframes fadeIn {
@@ -116,7 +120,7 @@ const translations = {
       status: '暂时放弃游戏主线任务，转为狂刷技术副本',
       learning: '正在钻研：Unity & C#',
       bio: '在技术与游戏之间反复横跳，梦想是打造自由度拉满的开放世界(´• ω •`)',
-      message: '留言', // Keep translation key but unused
+      message: '留言', 
       skills: '技能分布',
       online: '在线'
     },
@@ -177,7 +181,7 @@ const translations = {
       intro: '本站是一个基于现代前端技术栈构建的个人展示空间。设计上追求极简与美观的平衡，交互上注重流畅与响应式体验。\n无论是代码的编写还是界面的打磨，都倾注了对技术的热爱。',
       tech_stack: '技术栈',
       features: '设计特性',
-      version: '当前版本：v2.5.2 (No Guestbook)'
+      version: '当前版本：v2.5.3 (Stable)'
     },
     settings: {
       title: '个性化设置',
@@ -280,7 +284,7 @@ const translations = {
       intro: 'This site is built with a modern frontend stack, aiming for a balance between minimalism and aesthetics.\nBoth the code and the interface design reflect my passion for technology.',
       tech_stack: 'Tech Stack',
       features: 'Features',
-      version: 'Current Version: v2.5.2 (No Guestbook)'
+      version: 'Current Version: v2.5.3 (Stable)'
     },
     settings: {
       title: 'Personalization',
@@ -474,7 +478,7 @@ const Hero = ({ hue, darkMode, t }) => {
   ];
 
   return (
-    // FIX: Changed h-[100svh] to h-screen to prevent layout jitter on mobile when address bar resizes
+    // 【修复抽搐关键点2】：给 Hero 区域加上 overflow-hidden，防止底部跳动的箭头触发滚动条
     <div className={`relative h-screen w-full flex flex-col justify-end items-center text-center px-4 overflow-hidden mb-8 pb-32`}>
       <div className={`z-10 relative flex flex-col items-center animate-fade-in-up`}> 
         <div className="mb-10 min-h-[3rem] flex items-center">
@@ -1590,7 +1594,8 @@ export default function App() {
     <div className={`min-h-screen transition-colors duration-300 font-sans selection:bg-pink-200 selection:text-pink-900 ${darkMode ? 'bg-gray-900' : 'bg-[#fdfbf8]'} relative`}>
       <GlobalStyles hue={hue} darkMode={darkMode} />
 
-      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+      {/* 【修复背景放大关键点】：使用 h-[100svh] 锁定高度，防止 iOS 地址栏收缩导致背景图片拉伸 */}
+      <div className="fixed top-0 left-0 w-full h-[100svh] pointer-events-none z-0 overflow-hidden">
         {bgConfig.url === 'default' ? (
             <>
                 <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full mix-blend-multiply filter blur-[120px] animate-blob opacity-40" style={{ backgroundColor: getThemeColor(hue, 0.4) }}></div>
