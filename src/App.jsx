@@ -1,14 +1,13 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Moon, Sun, Menu, Search, Github, Youtube, 
   Home, Book, Link as LinkIcon, User, 
-  MoreHorizontal, ChevronDown, Music, Image as ImageIcon, 
+  ChevronDown, Image as ImageIcon, 
   FileText, Calendar, Clock, BarChart2, Tag, Coffee, 
-  Heart, Play, SkipForward, Palette, X, MapPin, GraduationCap,
-  Zap, Mail, Copy, Check, Instagram, Gamepad2, ExternalLink, Star, 
-  Settings, Sliders, Image as ImgIcon, Upload, Sparkles, Layout, Cloud, FolderGit2, Loader2, Plus,
-  Quote, Code, Terminal, BadgeCheck, Camera, Link2, Smile, Layers, Monitor, Paintbrush, Globe, Languages,
-  BookOpen, GitBranch, Eye, GitFork, Scale, Timer, AlertTriangle
+  Heart, SkipForward, Palette, X, MapPin, GraduationCap,
+  Zap, Mail, Check, Instagram, Gamepad2, Star, 
+  Settings, Sparkles, Layout, FolderGit2, Loader2, Plus,
+  Code, Terminal, BadgeCheck, Camera, BookOpen, GitFork, Scale, Timer, AlertTriangle, Languages, Mail as MailIcon, Copy
 } from 'lucide-react';
 
 // --- Hook: Load marked.js dynamically ---
@@ -33,14 +32,12 @@ const GlobalStyles = ({ hue, darkMode }) => (
     @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap');
     
     html {
-      /* 【修复抽搐关键点1】强制显示滚动条轨道，防止页面因内容变化导致的左右跳动 */
       overflow-y: scroll; 
       scrollbar-gutter: stable;
     }
 
     body {
       font-family: 'Nunito', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-      /* 防止 iOS 回弹效果导致的背景露白 */
       overscroll-behavior-y: none;
     }
     
@@ -54,7 +51,7 @@ const GlobalStyles = ({ hue, darkMode }) => (
     
     .animate-blob {
       animation: blob 7s infinite;
-      will-change: transform; /* Performance fix: Hardware acceleration */
+      will-change: transform;
     }
     .animation-delay-2000 {
       animation-delay: 2s;
@@ -148,14 +145,16 @@ const translations = {
     },
     daily: {
       gallery_title: '美好瞬间',
-      gallery_desc: '记录生活中的点点滴滴'
+      gallery_desc: '记录生活中的点点滴滴',
+      empty: '暂时还没有照片哦，以后再来吧~ (´• ω •`)'
     },
     projects: {
       title: '我的项目库',
       desc: '从 GitHub 自动同步的开源项目列表'
     },
     articles: {
-      title: '文章列表'
+      title: '文章列表',
+      empty: '博主正在努力码字中... ✍️'
     },
     github_reader: {
       loading_repos: '正在从 GitHub 获取项目...',
@@ -174,14 +173,16 @@ const translations = {
     links: {
       title: '友情链接',
       desc: '欢迎交换友链，一起在这个互联网角落发光发热 ✨',
-      apply: '申请友链'
+      apply: '申请友链',
+      email_copied: '邮箱已复制到剪贴板！',
+      click_to_email: '点击复制邮箱 & 发送'
     },
     about: {
       title: '关于本站',
       intro: '本站是一个基于现代前端技术栈构建的个人展示空间。设计上追求极简与美观的平衡，交互上注重流畅与响应式体验。\n无论是代码的编写还是界面的打磨，都倾注了对技术的热爱。',
       tech_stack: '技术栈',
       features: '设计特性',
-      version: '当前版本：v2.5.3 (Stable)'
+      version: '当前版本：v2.5.7 (Final Polish)'
     },
     settings: {
       title: '个性化设置',
@@ -207,7 +208,7 @@ const translations = {
     nav: {
       home: 'Home',
       home_station: 'Lengxi\'s Site',
-      home_nest: 'Lengxi\'s ACG Nest',
+      home_nest: 'Dimensional Nest',
       daily: 'Daily',
       projects: 'Projects',
       articles: 'Blog',
@@ -251,14 +252,16 @@ const translations = {
     },
     daily: {
       gallery_title: 'Moments',
-      gallery_desc: 'Capturing the beauty of life'
+      gallery_desc: 'Capturing the beauty of life',
+      empty: 'No photos yet, come back later~ (´• ω •`)'
     },
     projects: {
       title: 'My Projects',
       desc: 'Open source projects synced from GitHub'
     },
     articles: {
-      title: 'All Posts'
+      title: 'All Posts',
+      empty: 'Writing in progress... ✍️'
     },
     github_reader: {
       loading_repos: 'Fetching projects from GitHub...',
@@ -277,14 +280,16 @@ const translations = {
     links: {
       title: 'Friend Links',
       desc: 'Let\'s connect and shine together in this corner of the internet ✨',
-      apply: 'Apply Link'
+      apply: 'Apply Link',
+      email_copied: 'Email copied to clipboard!',
+      click_to_email: 'Click to Copy & Email'
     },
     about: {
       title: 'About This Site',
       intro: 'This site is built with a modern frontend stack, aiming for a balance between minimalism and aesthetics.\nBoth the code and the interface design reflect my passion for technology.',
       tech_stack: 'Tech Stack',
       features: 'Features',
-      version: 'Current Version: v2.5.3 (Stable)'
+      version: 'Current Version: v2.5.7 (Final Polish)'
     },
     settings: {
       title: 'Personalization',
@@ -353,61 +358,10 @@ const SOCIAL_LINKS = [
     { name: "Steam", href: "https://steamcommunity.com/id/lengxiya/", icon: <SteamIcon />, color: "#171a21" },
 ];
 
-const galleryImages = [
-    { id: 1, title: "夏日祭典", url: "https://images.unsplash.com/photo-1505356822725-08ad25f3ffe4?w=500&auto=format&fit=crop" },
-    { id: 2, title: "东京塔", url: "https://images.unsplash.com/photo-1536098561742-ca998e48cbcc?w=500&auto=format&fit=crop" },
-    { id: 3, title: "樱花", url: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=500&auto=format&fit=crop" },
-    { id: 4, title: "猫咪", url: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=500&auto=format&fit=crop" },
-];
-
-const posts = [
-  {
-    id: 1,
-    title: "Markdown 编写指南与测试",
-    title_en: "Markdown Guide & Test",
-    date: "2025-01-20",
-    category: "教程",
-    category_en: "Tutorial",
-    words: 1700,
-    tags: ["Markdown", "写作"],
-    summary: "这是一个简单的 Markdown 笔记示例。测试标题、列表、粗体以及代码块的渲染效果...",
-    summary_en: "A simple Markdown note example testing headers, lists, bold text and code block rendering...",
-    top: true,
-  },
-  {
-    id: 2,
-    title: "2024 年度总结：在这纷繁的世界里",
-    title_en: "2024 Year in Review",
-    date: "2024-12-31",
-    category: "随笔",
-    category_en: "Essay",
-    words: 2300,
-    tags: ["生活", "年终总结"],
-    summary: "时间过得真快，转眼间一年又过去了。今年发生了很多事情，有开心的也有难过的...",
-    summary_en: "Time flies, another year has passed. Many things happened this year, both happy and sad...",
-    top: false,
-  },
-  {
-    id: 3,
-    title: "React Hooks 最佳实践解析",
-    title_en: "React Hooks Best Practices",
-    date: "2024-11-15",
-    category: "技术",
-    category_en: "Tech",
-    words: 3500,
-    tags: ["React", "前端", "代码"],
-    summary: "深入探讨 useEffect 和 useMemo 的使用场景，避免常见的闭包陷阱和性能问题。",
-    summary_en: "Deep dive into useEffect and useMemo scenarios, avoiding common closure traps and performance issues.",
-    top: false,
-  },
-];
-
-const friendLinks = [
-    { name: "Akira's Blog", desc: "技术大佬的博客", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Akira", url: "#" },
-    { name: "Sakura Dev", desc: "前端开发日常", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sakura", url: "#" },
-    { name: "Moe World", desc: "二次元同好会", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Moe", url: "#" },
-    { name: "Code Life", desc: "编程与生活", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Code", url: "#" },
-];
+// Content Cleared
+const galleryImages = [];
+const posts = [];
+const friendLinks = []; 
 
 // --- Helper Functions ---
 const getThemeColor = (hue, alpha = 1, type = 'default') => {
@@ -478,8 +432,7 @@ const Hero = ({ hue, darkMode, t }) => {
   ];
 
   return (
-    // 【修复抽搐关键点2】：给 Hero 区域加上 overflow-hidden，防止底部跳动的箭头触发滚动条
-    <div className={`relative h-screen w-full flex flex-col justify-end items-center text-center px-4 overflow-hidden mb-8 pb-32`}>
+    <div className={`relative h-[100svh] w-full flex flex-col justify-end items-center text-center px-4 overflow-hidden mb-8 pb-32`}>
       <div className={`z-10 relative flex flex-col items-center animate-fade-in-up`}> 
         <div className="mb-10 min-h-[3rem] flex items-center">
            <Typewriter phrases={typewriterPhrases} hue={hue} darkMode={darkMode} />
@@ -763,50 +716,10 @@ const StatCard = ({ darkMode, hue, t }) => {
 };
 
 // --- ArticleList ---
-const ArticleList = ({ darkMode, hue, lang }) => (
-  <div className="space-y-6">
-    {posts.map(post => (
-      <div key={post.id} className={`group ${glassCardClass(darkMode)} p-8 hover:shadow-2xl hover:-translate-y-3 transition-all duration-300`}>
-        <div className="flex items-center gap-3 mb-4">
-            {post.top && (
-              <span className="text-xs px-2.5 py-1 rounded-lg font-bold text-white shadow-sm" style={{ backgroundColor: getThemeColor(hue) }}>
-                {lang === 'en' ? 'TOP' : '置顶'}
-              </span>
-            )}
-            <h2 
-              className={`text-2xl font-bold transition-colors cursor-pointer ${darkMode ? 'text-white' : 'text-gray-900'}`} 
-            >
-              <span className="bg-gradient-to-r bg-[length:0%_3px] bg-no-repeat bg-left-bottom hover:bg-[length:100%_3px] transition-all duration-300 pb-1" style={{ backgroundImage: `linear-gradient(${getThemeColor(hue, 1, 'dark')}, ${getThemeColor(hue, 1, 'dark')})`}}>
-                {lang === 'en' && post.title_en ? post.title_en : post.title}
-              </span>
-            </h2>
-        </div>
-        
-        <div className="flex flex-wrap gap-6 text-sm text-gray-400 mb-6">
-          <span className="flex items-center gap-1.5"><Calendar size={14}/> {post.date}</span>
-          <span className="flex items-center gap-1.5"><Book size={14}/> {lang === 'en' && post.category_en ? post.category_en : post.category}</span>
-          <span className="flex items-center gap-1.5"><FileText size={14}/> {post.words} {lang === 'en' ? 'words' : '字'}</span>
-        </div>
-
-        <p className={`text-base leading-relaxed mb-6 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-          {lang === 'en' && post.summary_en ? post.summary_en : post.summary}
-        </p>
-
-        <div className="flex items-center justify-between mt-6 pt-6 border-t border-gray-100/50 dark:border-gray-700/50">
-          <div className="flex gap-2">
-            {post.tags.map(tag => (
-              <span key={tag} className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors cursor-pointer ${darkMode ? 'bg-gray-700/50 text-gray-300 hover:bg-gray-600/50' : 'bg-gray-100/80 text-gray-500 hover:bg-gray-200/80'}`}># {tag}</span>
-            ))}
-          </div>
-          <button 
-            className="w-10 h-10 rounded-full flex items-center justify-center text-white transition-transform hover:scale-110 hover:shadow-lg"
-            style={{ backgroundColor: getThemeColor(hue, 1, 'default') }}
-          >
-             <SkipForward size={16} />
-          </button>
-        </div>
-      </div>
-    ))}
+const ArticleList = ({ darkMode, hue, lang, t }) => (
+  <div className="flex flex-col items-center justify-center py-20 text-center opacity-60">
+      <Coffee size={48} className="mb-4 text-gray-400" />
+      <p className="text-gray-500">{t('articles.empty')}</p>
   </div>
 );
 
@@ -898,15 +811,11 @@ const GithubBlogView = ({ darkMode, hue, t, lang }) => {
 
   const getReadingStats = (content) => {
       if (!content) return { words: 0, time: 0 };
-      // Remove basic markdown syntax for better counting
       const cleanContent = content.replace(/[#*`~>\[\]\(\)]/g, ''); 
-      // Count Chinese characters
       const chinese = (cleanContent.match(/[\u4e00-\u9fa5]/g) || []).length;
-      // Count English words (approximate)
       const english = (cleanContent.replace(/[\u4e00-\u9fa5]/g, '').match(/[a-zA-Z0-9_\u0392-\u03c9\u0400-\u04FF]+(?:\S*)/g) || []).length;
       
       const totalCount = chinese + english;
-      // Assuming average reading speed of 400 chars/words per minute mixed
       const time = Math.ceil(totalCount / 400); 
       
       return { words: totalCount, time: time || 1 };
@@ -1045,28 +954,9 @@ const GithubBlogView = ({ darkMode, hue, t, lang }) => {
 };
 
 const GalleryGrid = ({ darkMode, hue, t }) => (
-    <div className="grid grid-cols-2 gap-4">
-        {galleryImages.map((img, i) => (
-            <div 
-              key={img.id} 
-              className={`rounded-2xl overflow-hidden shadow-sm aspect-[4/3] relative group cursor-pointer transition-transform hover:-translate-y-1 hover:shadow-md`}
-              style={{ backgroundColor: getThemeColor((hue + i * 30) % 360, 0.2) }}
-            >
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors"></div>
-                <div className="absolute inset-0 flex items-center justify-center">
-                    <img src={img.url} alt={img.title} className="w-full h-full object-cover" loading="lazy" />
-                </div>
-                <div className="absolute bottom-3 left-3 right-3">
-                    <div className="bg-white/90 dark:bg-black/60 backdrop-blur-md p-2 rounded-xl translate-y-full opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-                        <span className="text-sm font-bold block text-center dark:text-white">{img.title}</span>
-                    </div>
-                </div>
-            </div>
-        ))}
-         <div className={`rounded-2xl border-2 border-dashed flex flex-col gap-2 items-center justify-center aspect-[4/3] hover:border-blue-400 transition-colors cursor-pointer ${darkMode ? 'border-gray-700 text-gray-500' : 'border-gray-200 text-gray-400'}`}>
-            <Settings size={24} />
-            <span className="text-sm font-medium">{t('home.view_more')}</span>
-         </div>
+    <div className="flex flex-col items-center justify-center py-20 text-center opacity-60">
+        <Camera size={48} className="mb-4 text-gray-400" />
+        <p className="text-gray-500">{t('daily.empty')}</p>
     </div>
 )
 
@@ -1083,15 +973,19 @@ const Navbar = ({
   const pickerRef = useRef(null);
   
   const handleNavClick = (viewId) => {
+    // 【关键修复2】首页动画逻辑修正
     if (viewId === 'home') {
         if (currentView === 'home') {
+            // 如果已经在首页，保留“反复横跳”的趣味功能
             if (window.scrollY < window.innerHeight / 2) {
                 window.scrollTo({ top: window.innerHeight - 80, behavior: 'smooth' });
             } else {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
         } else {
+            // 如果从其他页面点首页，直接切换并回到顶部（像普通页面切换一样）
             setCurrentView('home');
+            // 延时一点点让页面渲染完后滚动到内容区（跳过Hero）
             setTimeout(() => {
                 window.scrollTo({ top: window.innerHeight - 80, behavior: 'smooth' }); 
             }, 10);
@@ -1310,7 +1204,7 @@ const Navbar = ({
                                                       </div>
                                                   )}
                                                   {bgConfig.url === bg.url && (<div className="absolute bottom-1.5 right-1.5 bg-blue-500 rounded-full p-[2px] shadow-sm flex items-center justify-center"><Check size={8} className="text-white" strokeWidth={3} /></div>)}
-                                      </div>
+                                  </div>
                               ))}
                           </div>
                           <span className="text-xs font-semibold text-gray-500 flex items-center gap-1 mb-3"><ImageIcon size={12}/> {t('settings.wallpaper')}</span>
@@ -1353,9 +1247,10 @@ const Navbar = ({
       </div>
       
       {/* Mobile Nav Dropdown */}
+      {/* 【关键修复1】修正手机竖屏模式下菜单模糊效果 */}
       {isMenuOpen && (
-          <div className={`md:hidden absolute top-16 left-0 w-full border-b shadow-lg p-4 flex flex-col gap-2 backdrop-blur-xl animate-fade-in
-            ${darkMode ? 'bg-gray-900/80 border-gray-800' : 'bg-white/80 border-white/50'}`}
+          <div className={`md:hidden absolute top-16 left-0 w-full border-b shadow-lg p-4 flex flex-col gap-2 backdrop-blur-xl animate-fade-in z-50
+            ${darkMode ? 'bg-gray-900/70 border-gray-800' : 'bg-white/70 border-white/50'}`}
           >
                {navItems.map((item) => (
                     <button
@@ -1392,33 +1287,48 @@ const DailyView = ({ hue, darkMode, t }) => (
 );
 
 // 3. LinksView
-const LinksView = ({ hue, darkMode, t }) => (
-    <div className="animate-fade-in-content">
-         <div className="text-center mb-10">
-             <h2 className={`text-3xl font-bold mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}>{t('links.title')}</h2>
-             <p className={`${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{t('links.desc')}</p>
-         </div>
-         
-         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-             {friendLinks.map((link, i) => (
-                 <a key={i} href={link.url} className={`flex items-center gap-4 p-4 rounded-2xl border transition-all hover:-translate-y-1 hover:shadow-lg ${darkMode ? 'bg-gray-800/50 border-gray-700 hover:bg-gray-800 text-gray-200' : 'bg-white/60 border-gray-200 hover:bg-white text-gray-800'}`}>
-                     <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-gray-100 dark:border-gray-600 flex-shrink-0">
-                         <img src={link.avatar} alt={link.name} className="w-full h-full object-cover" />
-                     </div>
-                     <div>
-                         <h3 className="font-bold text-lg mb-1">{link.name}</h3>
-                         <p className="text-xs opacity-70 line-clamp-2">{link.desc}</p>
-                     </div>
-                 </a>
-             ))}
-             {/* Apply Link Card */}
-             <div className={`flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border border-dashed cursor-pointer transition-colors ${darkMode ? 'border-gray-700 text-gray-500 hover:border-gray-500 hover:text-gray-300' : 'border-gray-300 text-gray-400 hover:border-gray-400 hover:text-gray-600'}`}>
-                 <Plus size={32} />
-                 <span className="text-sm font-medium">{t('links.apply')}</span>
+// 【关键修复3】友链申请改版：点击复制 + 邮件唤起
+const LinksView = ({ hue, darkMode, t }) => {
+    const [copied, setCopied] = useState(false);
+
+    const handleEmailClick = () => {
+        const email = "date200325@gmail.com";
+        navigator.clipboard.writeText(email);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2500);
+        window.location.href = `mailto:${email}`;
+    };
+
+    return (
+        <div className="animate-fade-in-content">
+             <div className="text-center mb-10">
+                 <h2 className={`text-3xl font-bold mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}>{t('links.title')}</h2>
+                 <p className={`${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{t('links.desc')}</p>
              </div>
-         </div>
-    </div>
-);
+             
+             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                 {/* 申请友链入口 */}
+                 <div 
+                    onClick={handleEmailClick}
+                    className={`flex flex-col items-center justify-center gap-2 p-6 rounded-2xl border border-dashed cursor-pointer transition-all hover:-translate-y-1 hover:shadow-lg ${darkMode ? 'border-gray-700 text-gray-500 hover:border-gray-500 hover:text-gray-300 bg-gray-800/20' : 'border-gray-300 text-gray-400 hover:border-gray-400 hover:text-gray-600 bg-gray-50/50'}`}
+                 >
+                     {copied ? (
+                         <div className="flex flex-col items-center animate-in zoom-in">
+                             <Check size={32} className="text-green-500 mb-2"/>
+                             <span className="text-sm font-bold text-green-500">{t('links.email_copied')}</span>
+                         </div>
+                     ) : (
+                         <div className="flex flex-col items-center">
+                             <MailIcon size={32} className="mb-2"/>
+                             <span className="text-sm font-medium">{t('links.apply')}</span>
+                             <span className="text-xs opacity-50 mt-1 flex items-center gap-1"><Copy size={10}/> {t('links.click_to_email')}</span>
+                         </div>
+                     )}
+                 </div>
+             </div>
+        </div>
+    );
+};
 
 // 4. AboutView
 const AboutView = ({ hue, darkMode, t }) => (
@@ -1571,6 +1481,16 @@ export default function App() {
     else document.documentElement.classList.remove('dark');
   }, [darkMode]);
 
+  useEffect(() => {
+      let themeMeta = document.querySelector('meta[name="theme-color"]');
+      if (!themeMeta) {
+          themeMeta = document.createElement('meta');
+          themeMeta.name = 'theme-color';
+          document.head.appendChild(themeMeta);
+      }
+      themeMeta.content = darkMode ? '#111827' : '#ffffff';
+  }, [darkMode]);
+
   useEffect(() => localStorage.setItem('hue', hue.toString()), [hue]);
   useEffect(() => localStorage.setItem('bgConfig', JSON.stringify(bgConfig)), [bgConfig]);
   useEffect(() => localStorage.setItem('currentView', currentView), [currentView]);
@@ -1583,7 +1503,7 @@ export default function App() {
           case 'home': return <HomeView hue={hue} darkMode={darkMode} t={t} lang={lang} />;
           case 'daily': return <DailyView hue={hue} darkMode={darkMode} t={t} />;
           case 'projects': return <GithubBlogView darkMode={darkMode} hue={hue} t={t} lang={lang} />;
-          case 'articles': return <div className="animate-fade-in-content"><h2 className={`text-2xl font-bold mb-6 flex items-center gap-2 ${darkMode ? 'text-white' : 'text-gray-900'}`}><Book/> {t('articles.title')}</h2><ArticleList darkMode={darkMode} hue={hue} lang={lang} /></div>; 
+          case 'articles': return <div className="animate-fade-in-content"><h2 className={`text-2xl font-bold mb-6 flex items-center gap-2 ${darkMode ? 'text-white' : 'text-gray-900'}`}><Book/> {t('articles.title')}</h2><ArticleList darkMode={darkMode} hue={hue} lang={lang} t={t} /></div>; 
           case 'links': return <LinksView hue={hue} darkMode={darkMode} t={t} />;
           case 'about': return <AboutView hue={hue} darkMode={darkMode} t={t} />;
           default: return <HomeView hue={hue} darkMode={darkMode} t={t} lang={lang} />;
@@ -1591,10 +1511,9 @@ export default function App() {
   };
 
   return (
-    <div className={`min-h-screen transition-colors duration-300 font-sans selection:bg-pink-200 selection:text-pink-900 ${darkMode ? 'bg-gray-900' : 'bg-[#fdfbf8]'} relative`}>
+    <div className={`flex flex-col min-h-screen transition-colors duration-300 font-sans selection:bg-pink-200 selection:text-pink-900 ${darkMode ? 'bg-gray-900' : 'bg-[#fdfbf8]'} relative`}>
       <GlobalStyles hue={hue} darkMode={darkMode} />
 
-      {/* 【修复背景放大关键点】：使用 h-[100svh] 锁定高度，防止 iOS 地址栏收缩导致背景图片拉伸 */}
       <div className="fixed top-0 left-0 w-full h-[100svh] pointer-events-none z-0 overflow-hidden">
         {bgConfig.url === 'default' ? (
             <>
@@ -1632,14 +1551,13 @@ export default function App() {
         t={t}
       />
         
-      {/* Show Hero ONLY on Home Page */}
       {currentView === 'home' && <Hero hue={hue} darkMode={darkMode} t={t} />}
 
-      <main className={`max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 pb-20 relative z-20 min-h-[60vh] ${currentView === 'home' ? '' : 'pt-24'}`}>
+      <main className={`flex-grow max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 pb-20 relative z-20 w-full ${currentView === 'home' ? '' : 'pt-24'}`}>
          {renderContent()}
       </main>
 
-      <footer className={`py-12 mt-10 text-center text-sm ${darkMode ? 'bg-gray-900/80 text-gray-500 border-gray-800' : 'bg-white/60 text-gray-400 border-white/50'} border-t backdrop-blur-md relative z-20`}>
+      <footer className={`py-12 mt-auto text-center text-sm ${darkMode ? 'bg-gray-900/80 text-gray-500 border-gray-800' : 'bg-white/60 text-gray-400 border-white/50'} border-t backdrop-blur-md relative z-20`}>
           <div className="max-w-7xl mx-auto px-4">
              <p className="mb-2">{t('footer.copyright')}</p>
              <p className="text-xs opacity-60">{t('footer.motto')}</p>
