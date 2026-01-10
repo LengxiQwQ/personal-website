@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   Moon, Sun, Menu, Search, Github, Youtube, 
   Home, Book, Link as LinkIcon, User, 
@@ -83,292 +83,68 @@ const GlobalStyles = ({ hue, darkMode }) => {
     /* --- Twikoo 样式净化与微调 --- */
     /* ========================================= */
     
-    .tk-main, .tk-main * {
-        box-sizing: border-box !important;
-    }
+    .tk-main, .tk-main * { box-sizing: border-box !important; }
+    #tcomment { position: relative; z-index: 10; width: 100%; overflow: hidden; }
+    .tk-main { width: 100% !important; margin: 0 !important; padding: 0 !important; }
 
-    #tcomment {
-        position: relative;
-        z-index: 10;
-        width: 100%;
-        overflow: hidden;
-    }
-    .tk-main {
-        width: 100% !important;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
+    /* Input区域垂直排列 */
+    .tk-submit .tk-row { display: flex !important; flex-direction: column !important; align-items: flex-start !important; margin: 0 !important; gap: 16px !important; }
 
-    /* --- 1. 布局：强制垂直排列 (Input区域) --- */
-    .tk-submit .tk-row {
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: flex-start !important;
-        margin: 0 !important;
-        gap: 16px !important;
-    }
+    /* 头像 */
+    .tk-avatar { display: flex !important; justify-content: center; align-items: center; width: 64px !important; height: 64px !important; border-radius: 50% !important; border: 4px solid ${darkMode ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.5)'} !important; box-shadow: none !important; margin: 0 !important; overflow: hidden !important; padding: 0 !important; }
+    .tk-avatar img { width: 100% !important; height: 100% !important; object-fit: cover !important; border-radius: 50% !important; margin: 0 !important; }
 
-    /* --- 2. 头像 (Input区域) --- */
-    .tk-avatar {
-        display: flex !important;
-        justify-content: center;
-        align-items: center;
-        width: 64px !important;
-        height: 64px !important;
-        border-radius: 50% !important;
-        border: 4px solid ${darkMode ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.5)'} !important;
-        box-shadow: none !important;
-        margin: 0 !important;
-        overflow: hidden !important;
-        padding: 0 !important;
-        transition: none !important;
-        transform: none !important;
-    }
-    .tk-avatar img {
-        width: 100% !important;
-        height: 100% !important;
-        object-fit: cover !important;
-        border-radius: 50% !important;
-        margin: 0 !important;
-    }
+    .tk-col { width: 100% !important; padding: 0 !important; }
 
-    /* --- 3. 输入区域容器 --- */
-    .tk-col {
-        width: 100% !important;
-        padding: 0 !important;
-    }
-
-    /* --- 4. 昵称/邮箱/网址 (Input区域 - 保留以防错位) --- */
-    .tk-meta-input {
-        display: flex !important;
-        flex-direction: column !important;
-        gap: 10px !important;
-        margin-bottom: 12px !important;
-        width: 100% !important;
-    }
-    .tk-meta-input .el-input {
-        display: flex !important; 
-        flex-direction: row !important;
-        align-items: center !important;
-        width: 100% !important;
-        margin: 0 !important;
-        position: relative !important;
-        background-color: ${darkMode ? 'rgba(0, 0, 0, 0.2)' : 'rgba(255, 255, 255, 0.5)'} !important;
-        border-radius: 12px !important;
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border: 1px solid transparent !important; 
-        padding: 0 !important;
-        overflow: hidden !important; 
-    }
-    .tk-meta-input .el-input-group__prepend {
-        position: static !important;
-        display: block !important;
-        width: auto !important;
-        min-width: 60px !important; 
-        flex-shrink: 0 !important; 
-        background: transparent !important;
-        border: none !important;
-        color: ${darkMode ? '#9ca3af' : '#6b7280'} !important;
-        font-weight: 800 !important;
-        padding: 0 0 0 12px !important; 
-        font-size: 13px !important;
-        line-height: 44px !important;
-        height: 44px !important;
-        text-align: center !important;
-        white-space: nowrap !important;
-        box-shadow: none !important;
-    }
-    .tk-meta-input .el-input__inner {
-        position: static !important;
-        display: block !important;
-        flex: 1 !important; 
-        width: 100% !important; 
-        background: transparent !important;
-        border: none !important; 
-        border-radius: 0 !important;
-        color: ${darkMode ? '#f3f4f6' : '#1f2937'} !important;
-        box-shadow: none !important;
-        transition: none !important;
-        transform: none !important;
-        height: 44px !important;
-        line-height: 44px !important;
-        padding: 0 12px !important; 
-    }
-    .tk-input .el-textarea__inner {
-        width: 100% !important;
-        background-color: ${darkMode ? 'rgba(0, 0, 0, 0.2)' : 'rgba(255, 255, 255, 0.5)'} !important;
-        border: 1px solid transparent !important;
-        border-radius: 12px !important;
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        color: ${darkMode ? '#f3f4f6' : '#1f2937'} !important;
-        box-shadow: none !important;
-        min-height: 120px !important;
-        padding: 16px !important;
-        resize: none !important;
-        margin-bottom: 4px !important;
-        transition: none !important;
-    }
-    .tk-meta-input .el-input:focus-within,
-    .tk-input .el-textarea__inner:focus {
-        background-color: ${darkMode ? 'rgba(0, 0, 0, 0.4)' : 'rgba(255, 255, 255, 0.8)'} !important;
-    }
+    /* 输入框样式 */
+    .tk-meta-input { display: flex !important; flex-direction: column !important; gap: 10px !important; margin-bottom: 12px !important; width: 100% !important; }
+    .tk-meta-input .el-input { display: flex !important; flex-direction: row !important; align-items: center !important; width: 100% !important; margin: 0 !important; background-color: ${darkMode ? 'rgba(0, 0, 0, 0.2)' : 'rgba(255, 255, 255, 0.5)'} !important; border-radius: 12px !important; backdrop-filter: blur(12px); border: 1px solid transparent !important; padding: 0 !important; overflow: hidden !important; }
+    .tk-meta-input .el-input-group__prepend { display: block !important; width: auto !important; min-width: 60px !important; background: transparent !important; border: none !important; color: ${darkMode ? '#9ca3af' : '#6b7280'} !important; font-weight: 800 !important; padding: 0 0 0 12px !important; font-size: 13px !important; line-height: 44px !important; height: 44px !important; text-align: center !important; }
+    .tk-meta-input .el-input__inner { display: block !important; flex: 1 !important; width: 100% !important; background: transparent !important; border: none !important; color: ${darkMode ? '#f3f4f6' : '#1f2937'} !important; height: 44px !important; line-height: 44px !important; padding: 0 12px !important; }
+    .tk-input .el-textarea__inner { width: 100% !important; background-color: ${darkMode ? 'rgba(0, 0, 0, 0.2)' : 'rgba(255, 255, 255, 0.5)'} !important; border: 1px solid transparent !important; border-radius: 12px !important; backdrop-filter: blur(12px); color: ${darkMode ? '#f3f4f6' : '#1f2937'} !important; min-height: 120px !important; padding: 16px !important; resize: none !important; margin-bottom: 4px !important; }
+    .tk-meta-input .el-input:focus-within, .tk-input .el-textarea__inner:focus { background-color: ${darkMode ? 'rgba(0, 0, 0, 0.4)' : 'rgba(255, 255, 255, 0.8)'} !important; }
     .tk-main ::-webkit-input-placeholder { color: ${darkMode ? '#6b7280' : '#9ca3af'} !important; opacity: 0.7 !important; font-size: 12px !important; }
-    .tk-main ::-moz-placeholder { color: ${darkMode ? '#6b7280' : '#9ca3af'} !important; opacity: 0.7 !important; font-size: 12px !important; }
-    .tk-main ::placeholder { color: ${darkMode ? '#6b7280' : '#9ca3af'} !important; opacity: 0.7 !important; font-size: 12px !important; }
 
-    /* --- 5. 提交按钮 (Input区域) --- */
-    .tk-submit {
-        background: transparent !important;
-        border: none !important;
-        box-shadow: none !important;
-        color: ${themeColor} !important;
-        padding: 8px 24px !important;
-        font-weight: 700 !important;
-        font-size: 14px !important;
-        cursor: pointer !important;
-        transform: none !important;
-        transition: none !important;
-        animation: none !important;
-    }
-    .tk-submit:hover, .tk-submit:active, .tk-submit:focus {
-        background: transparent !important;
-        opacity: 1 !important; 
-        color: ${themeColor} !important;
-    }
+    /* 提交按钮 */
+    .tk-submit { background: transparent !important; border: none !important; color: ${themeColor} !important; padding: 8px 24px !important; font-weight: 700 !important; font-size: 14px !important; cursor: pointer !important; }
 
-    /* ================================================= */
-    /* --- 6. 评论列表美化 (安全模式) --- */
-    /* ================================================= */
+    /* 评论列表 */
+    .tk-comments-container { margin-top: 32px !important; }
+    .tk-comment { margin-top: 16px !important; padding: 20px !important; background: ${darkMode ? 'rgba(30, 41, 59, 0.3)' : 'rgba(255, 255, 255, 0.4)'} !important; border: 1px solid ${darkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.5)'} !important; border-radius: 16px !important; backdrop-filter: blur(8px) !important; box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.05) !important; transition: transform 0.2s ease, background 0.2s ease !important; }
+    .tk-comment:hover { background: ${darkMode ? 'rgba(30, 41, 59, 0.5)' : 'rgba(255, 255, 255, 0.6)'} !important; transform: translateY(-2px) !important; }
+    .tk-comment .tk-avatar { width: 44px !important; height: 44px !important; border: 2px solid ${darkMode ? 'rgba(255,255,255,0.1)' : '#fff'} !important; margin-right: 16px !important; }
+    .tk-nick { font-size: 14px !important; font-weight: 800 !important; color: ${darkMode ? '#f3f4f6' : '#111827'} !important; }
+    .tk-content { margin-top: 8px !important; font-size: 15px !important; line-height: 1.7 !important; color: ${darkMode ? '#d1d5db' : '#374151'} !important; }
+    .tk-content a { color: ${themeColor} !important; text-decoration: none !important; border-bottom: 1px dashed ${themeColor} !important; }
     
-    .tk-comments-container { 
-        margin-top: 32px !important; 
-    }
-
-    /* 评论卡片：增加背景、圆角、阴影 */
-    .tk-comment {
-        margin-top: 16px !important;
-        padding: 20px !important;
-        background: ${darkMode ? 'rgba(30, 41, 59, 0.3)' : 'rgba(255, 255, 255, 0.4)'} !important;
-        border: 1px solid ${darkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.5)'} !important;
-        border-radius: 16px !important;
-        backdrop-filter: blur(8px) !important;
-        box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.05) !important;
-        transition: transform 0.2s ease, background 0.2s ease !important;
-    }
-    
-    .tk-comment:hover {
-        background: ${darkMode ? 'rgba(30, 41, 59, 0.5)' : 'rgba(255, 255, 255, 0.6)'} !important;
-        transform: translateY(-2px) !important;
-    }
-
-    /* 评论者头像 (列表内) */
-    .tk-comment .tk-avatar { 
-        width: 44px !important; 
-        height: 44px !important; 
-        border: 2px solid ${darkMode ? 'rgba(255,255,255,0.1)' : '#fff'} !important; 
-        margin-right: 16px !important; 
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
-    }
-
-    /* 昵称 */
-    .tk-nick { 
-        font-size: 14px !important; 
-        font-weight: 800 !important; 
-        color: ${darkMode ? '#f3f4f6' : '#111827'} !important; 
-    }
-    
-    /* 评论内容 */
-    .tk-content { 
-        margin-top: 8px !important; 
-        font-size: 15px !important; 
-        line-height: 1.7 !important; 
-        color: ${darkMode ? '#d1d5db' : '#374151'} !important; 
-    }
-    .tk-content a { 
-        color: ${themeColor} !important; 
-        text-decoration: none !important; 
-        border-bottom: 1px dashed ${themeColor} !important; 
-    }
-    
-    /* --- 7. 元信息 (设备、时间) 极简微缩 --- */
-    
-    /* 容器布局 */
-    .tk-extras { 
-        margin-top: 8px !important; 
-        display: flex !important; 
-        flex-wrap: wrap !important; 
-        align-items: center !important;
-        gap: 6px !important; 
-        font-family: 'Nunito', monospace !important; 
-        opacity: 0.8 !important; 
-    }
-
-    /* 单个标签 (OS, Browser, Time) - 字体调小 */
-    .tk-extra, .tk-time {
-        display: inline-flex !important; 
-        align-items: center !important; 
-        font-size: 10px !important;  /* 核心：字体 10px */
-        color: ${darkMode ? '#9ca3af' : '#9ca3af'} !important;
-        background: ${darkMode ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)'} !important;
-        padding: 2px 6px !important; 
-        border-radius: 4px !important;
-        border: none !important;
-        line-height: 1.4 !important;
-        height: auto !important;
-    }
-    
-    .tk-time {
-        background: transparent !important;
-        padding-left: 0 !important;
-        margin-left: 2px !important;
-        font-size: 10px !important;
-    }
-
-    /* 核心：图标强制调小 */
-    .tk-extra .tk-icon, 
-    .tk-extra svg, 
-    .tk-extra img {
-        width: 10px !important;  
-        height: 10px !important; 
-        min-width: 10px !important;
-        margin-right: 3px !important; 
-        vertical-align: -1px !important;
-        display: inline-block !important; 
-        border: none !important;
-        background: transparent !important;
-        fill: currentColor !important;
-    }
-    
-    /* 隐藏多余的 Footer */
+    /* Meta 信息 */
+    .tk-extras { margin-top: 8px !important; display: flex !important; flex-wrap: wrap !important; align-items: center !important; gap: 6px !important; font-family: 'Nunito', monospace !important; opacity: 0.8 !important; }
+    .tk-extra, .tk-time { display: inline-flex !important; align-items: center !important; font-size: 10px !important; color: ${darkMode ? '#9ca3af' : '#9ca3af'} !important; background: ${darkMode ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)'} !important; padding: 2px 6px !important; border-radius: 4px !important; border: none !important; line-height: 1.4 !important; height: auto !important; }
+    .tk-time { background: transparent !important; padding-left: 0 !important; margin-left: 2px !important; font-size: 10px !important; }
+    .tk-extra .tk-icon, .tk-extra svg, .tk-extra img { width: 10px !important; height: 10px !important; min-width: 10px !important; margin-right: 3px !important; vertical-align: -1px !important; display: inline-block !important; }
     .tk-footer { display: none !important; }
     
-    /* --- 新增：IP 属地样式 --- */
+    /* --- 新增：IP 属地样式 (地图图标) --- */
     .tk-location {
         font-size: 10px !important;
         color: #9ca3af !important;
         margin-left: 8px !important;
         display: inline-flex !important;
         align-items: center !important;
+        gap: 3px !important; /* 图标文字间距 */
         border: 1px solid transparent;
         padding: 2px 6px;
         background: ${darkMode ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)'} !important;
         border-radius: 4px;
         line-height: 1.4;
     }
-    
-    /* 预览框样式 */
-    .tk-preview-container {
-        border: 1px dashed ${darkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'} !important;
-        background: transparent !important;
-        border-radius: 12px !important;
-        margin-bottom: 16px !important;
-        padding: 16px !important;
-        width: 100% !important;
+    .tk-location svg {
+        width: 10px !important;
+        height: 10px !important;
+        opacity: 0.8;
     }
     
-    /* 强制移除重复的 Action Icon (如果依然存在) */
+    .tk-preview-container { border: 1px dashed ${darkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'} !important; background: transparent !important; border-radius: 12px !important; margin-bottom: 16px !important; padding: 16px !important; width: 100% !important; }
     .tk-action-icon:nth-of-type(n+3) { display: none !important; }
   `}</style>
   );
@@ -482,8 +258,16 @@ const translations = {
       copyright: '© 2025 冷汐OωO 版权所有',
       motto: '冷汐OωO 的次元小窝'
     },
+    // --- 新增部分 ---
     guestbook: {
-      title: '留言板'
+      title: '留言板',
+      placeholder_nick: '必填',
+      placeholder_mail: '必填 用于头像识别',
+      placeholder_link: '可选 用于跳转',
+      button_preview: '预览',
+      button_send: '发送',
+      comments_count: '条评论',
+      comments_none: '暂无评论'
     }
   },
   en: {
@@ -592,12 +376,19 @@ const translations = {
       copyright: '© 2025 LengxiOωO All Rights Reserved',
       motto: 'LengxiOωO\'s Dimensional Nest'
     },
+    // --- 新增部分 ---
     guestbook: {
-      title: 'Guestbook'
+      title: 'Guestbook',
+      placeholder_nick: 'Nick (Required)',
+      placeholder_mail: 'Mail (For Avatar)',
+      placeholder_link: 'Website (Optional)',
+      button_preview: 'Preview',
+      button_send: 'Send',
+      comments_count: 'Comments',
+      comments_none: 'No Comments'
     }
   }
 };
-
 // --- Icon Components ---
 const BilibiliIcon = ({ size = 20, className }) => (
   <svg width={size} height={size} viewBox="0 0 1024 1024" version="1.1" fill="currentColor" className={className}>
@@ -1007,139 +798,220 @@ const StatCard = ({ darkMode, hue, t }) => {
   );
 };
 
-// --- Twikoo Guestbook Component (CDN 版 + 自动修改提示文字) ---
-const Guestbook = ({ darkMode, hue, t }) => {
+// --- Twikoo Guestbook Component (Ultimate Fix: i18n & IP) ---
+const Guestbook = ({ darkMode, hue, t, lang }) => {
     const initialized = useRef(false);
-    const [status, setStatus] = useState('loading'); // loading, success, error
+    const [status, setStatus] = useState('loading');
 
+    // 地图定位图标 SVG
+    const mapPinSvg = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:text-bottom; margin-right:2px;">
+        <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path>
+        <circle cx="12" cy="10" r="3"></circle>
+      </svg>
+    `;
+
+    // --- 核心功能：强制翻译界面 ---
+    // 使用 useCallback 确保在 useEffect 中能引用最新状态
+    const forceTranslateUI = useCallback(() => {
+        const container = document.getElementById('tcomment');
+        if (!container) return;
+
+        // 1. 翻译输入框 (Nick, Mail, Link)
+        // Twikoo 的输入框 class 通常是 el-input__inner
+        const inputs = container.querySelectorAll('.tk-meta-input input.el-input__inner');
+        if (inputs.length >= 3) {
+            const placeholders = [
+                t('guestbook.placeholder_nick'),
+                t('guestbook.placeholder_mail'),
+                t('guestbook.placeholder_link')
+            ];
+            inputs.forEach((input, index) => {
+                if (index < 3 && input.getAttribute('placeholder') !== placeholders[index]) {
+                    input.setAttribute('placeholder', placeholders[index]);
+                }
+            });
+        }
+        
+        // 翻译评论框 (Textarea)
+        const textarea = container.querySelector('.tk-input textarea.el-textarea__inner');
+        if (textarea) {
+            // 这里通常 Twikoo 默认是空或者配置里的文字，我们也可以覆盖它，或者只覆盖 placeholder
+            // textarea.setAttribute('placeholder', t('guestbook.placeholder_content') || 'Write something...'); 
+            // 你的字典里暂时没加 content placeholder，如果需要可以加，或者忽略
+        }
+
+        // 2. 翻译按钮 (预览 & 发送)
+        const btnPreview = container.querySelector('.tk-preview');
+        const btnSend = container.querySelector('.tk-submit');
+
+        if (btnPreview) {
+             // 只有当文字不一致时才修改，防止光标跳动或死循环
+             if (!btnPreview.innerText.includes(t('guestbook.button_preview'))) {
+                 btnPreview.innerText = t('guestbook.button_preview');
+             }
+        }
+        if (btnSend) {
+             if (!btnSend.innerText.includes(t('guestbook.button_send'))) {
+                 btnSend.innerText = t('guestbook.button_send');
+             }
+        }
+
+        // 3. 翻译评论数量 (例如 "10 条评论")
+        const countElem = container.querySelector('.tk-count');
+        if (countElem) {
+            const countText = countElem.innerText || "";
+            const match = countText.match(/\d+/);
+            const count = match ? match[0] : '0';
+            const newText = `${count} ${t('guestbook.comments_count')}`;
+            // 只有不同才修改
+            if (countElem.innerText !== newText) {
+                countElem.innerText = newText;
+            }
+        } else {
+            // 处理空状态 "暂无评论"
+            const emptyElem = container.querySelector('.tk-empty');
+            if (emptyElem) {
+                if (emptyElem.innerText !== t('guestbook.comments_none')) {
+                    emptyElem.innerText = t('guestbook.comments_none');
+                }
+            }
+        }
+
+    }, [t]);
+
+    // --- 核心功能：IP 处理 (只显示省份) ---
+    const fixIpLocation = useCallback(() => {
+        const container = document.getElementById('tcomment');
+        if (!container) return;
+
+        const comments = container.querySelectorAll('.tk-comment');
+        comments.forEach(comment => {
+             // 移除多余的 Action 按钮 (比如回复、点赞等，如果不需要可以隐藏，这里保留你之前的逻辑是移除多余的)
+             const actions = comment.querySelectorAll('.tk-action');
+             if (actions.length > 1) {
+                for (let i = 1; i < actions.length; i++) try { actions[i].remove(); } catch (e) {}
+             }
+
+             const meta = comment.querySelector('.tk-meta');
+             const time = comment.querySelector('.tk-time');
+             const extras = comment.querySelector('.tk-extras');
+
+             // 如果还没处理过 IP (没有 .tk-location 类)
+             if (meta && time && extras && !comment.querySelector('.tk-location')) {
+                  let locationNode = null;
+                  
+                  // 智能查找哪个节点是 IP 地址
+                  extras.querySelectorAll('.tk-extra').forEach(extra => {
+                      const text = extra.innerText;
+                      // 排除浏览器/系统信息
+                      const isUA = /Chrome|Safari|Firefox|Edge|Windows|Mac|Linux|Android|iOS|Ubuntu/i.test(text);
+                      if (!isUA && text.trim().length > 0) locationNode = extra;
+                  });
+
+                  if (locationNode) {
+                      const rawText = locationNode.innerText.trim(); 
+                      const parts = rawText.split(/\s+/);
+                      
+                      let locationText = rawText;
+                      // 提取逻辑: 
+                      // "中国 浙江 杭州" -> 取 "浙江" (index 1)
+                      // "美国" -> 取 "美国" (index 0)
+                      if (parts.length >= 2) {
+                          locationText = parts[1];
+                      } else if (parts.length === 1) {
+                          locationText = parts[0];
+                      }
+
+                      // 创建新节点
+                      const locSpan = document.createElement('span');
+                      locSpan.className = 'tk-location';
+                      locSpan.innerHTML = `${mapPinSvg} ${locationText}`;
+                      
+                      // 插入到时间后面
+                      if (time.nextSibling) {
+                          time.parentNode.insertBefore(locSpan, time.nextSibling);
+                      } else {
+                          time.parentNode.appendChild(locSpan);
+                      }
+                      
+                      // 隐藏原始节点
+                      locationNode.style.display = 'none';
+                  }
+             }
+        });
+    }, []);
+
+    // --- 监听 lang 变化，触发翻译 ---
+    useEffect(() => {
+        if (status === 'success') {
+            forceTranslateUI();
+            // 延时再次触发，防止 DOM 还没渲染完
+            setTimeout(forceTranslateUI, 100);
+        }
+    }, [lang, status, forceTranslateUI]);
+
+    // --- 初始化 Twikoo 并启动 变动观察者 (MutationObserver) ---
     useEffect(() => {
         if (initialized.current) return;
 
-        // 定义初始化函数
         const initTwikoo = () => {
             const container = document.getElementById('tcomment');
-            // 检查容器是否存在以及 window.twikoo 是否加载完毕
             if (container && window.twikoo) {
                 initialized.current = true;
-                console.log("正在初始化 Twikoo (CDN)...");
 
                 try {
                     window.twikoo.init({
                         envId: TWIKOO_ENV_ID,
                         el: '#tcomment',
                     }).then(() => {
-                        console.log('Twikoo 初始化成功');
                         setStatus('success');
                         
-                        // --- 核心修改：保持 Placeholder 修改 (保留功能) ---
-                        setTimeout(() => {
-                            const inputs = document.querySelectorAll('.tk-meta-input .el-input__inner');
-                            if (inputs.length >= 3) {
-                                if (inputs[0].getAttribute('placeholder') !== '必填') inputs[0].setAttribute('placeholder', '必填');
-                                if (inputs[1].getAttribute('placeholder') !== '必填 用于头像识别') inputs[1].setAttribute('placeholder', '必填 用于头像识别');
-                                if (inputs[2].getAttribute('placeholder') !== '可选 用于跳转') inputs[2].setAttribute('placeholder', '可选 用于跳转');
-                            }
-                        }, 500);
+                        // 1. 立即执行一次处理
+                        forceTranslateUI();
+                        fixIpLocation();
 
-                        // ===== 开始：Twikoo DOM 结构级修复 & IP 属地显示 =====
-                        (function () {
-                          function cleanupOnce(root) {
-                            if (!root) return;
-                            root.querySelectorAll('.tk-comment').forEach(comment => {
-                              // 1) 保证每条评论只有第一个 .tk-action 容器
-                              const actions = comment.querySelectorAll('.tk-action');
-                              if (actions.length > 1) {
-                                for (let i = 1; i < actions.length; i++) {
-                                  try { actions[i].remove(); } catch (e) { /* 忍错 */ }
-                                }
-                              }
-                              
-                              // 2) IP 属地搬运与格式化
-                              // 查找元信息栏中的位置信息（通常是不包含 OS/Browser 关键词的文本）
-                              const meta = comment.querySelector('.tk-meta');
-                              const time = comment.querySelector('.tk-time');
-                              const extras = comment.querySelector('.tk-extras');
-                              
-                              if (meta && time && extras && !comment.querySelector('.tk-location')) {
-                                  let locationNode = null;
-                                  extras.querySelectorAll('.tk-extra').forEach(extra => {
-                                      // 排除常见的浏览器和系统关键词
-                                      const isUA = /Chrome|Safari|Firefox|Edge|Windows|Mac|Linux|Android|iOS/i.test(extra.innerText);
-                                      // 简单的判断：如果不包含 UA 关键词且有内容，或者是 SVG 图标，大概率是位置
-                                      if (!isUA && extra.innerText.trim().length > 0) {
-                                          locationNode = extra;
-                                      }
-                                  });
+                        // 2. 启动观察者：只要 DOM 变动（比如加载评论、翻页），就重新执行处理
+                        const observer = new MutationObserver((mutations) => {
+                             // 使用 requestAnimationFrame 避免高频触发卡顿
+                             requestAnimationFrame(() => {
+                                 fixIpLocation();
+                                 forceTranslateUI();
+                             });
+                        });
+                        
+                        observer.observe(container, {
+                            childList: true, // 监听子元素增删
+                            subtree: true,   // 监听所有后代元素
+                            characterData: false // 不监听文本内容变化，防止我们在修改文本时死循环
+                        });
 
-                                  if (locationNode) {
-                                      // 格式化：将空格替换为点
-                                      const locText = locationNode.innerText.trim().replace(/\s+/g, '·'); 
-                                      const locSpan = document.createElement('span');
-                                      locSpan.className = 'tk-location';
-                                      locSpan.innerText = locText;
-                                      
-                                      // 插入到时间后面 (meta 的末尾，因为 time 通常是最后一个，或者 insertAfter time)
-                                      if (time.nextSibling) {
-                                          time.parentNode.insertBefore(locSpan, time.nextSibling);
-                                      } else {
-                                          time.parentNode.appendChild(locSpan);
-                                      }
-                                      
-                                      // 隐藏原始位置标签
-                                      locationNode.style.display = 'none';
-                                  }
-                              }
-                            });
-                          }
-
-                          // Debounce 辅助
-                          function debounce(fn, wait) {
-                            let t;
-                            return function () {
-                              clearTimeout(t);
-                              t = setTimeout(() => fn.apply(this, arguments), wait);
-                            };
-                          }
-
-                          // 入口：先一次性延迟清理
-                          setTimeout(() => {
-                            const container = document.getElementById('tcomment');
-                            if (container) cleanupOnce(container);
-                          }, 200);
-
-                          // 持续监听：使用 MutationObserver 保持结构正确
-                          const container = document.getElementById('tcomment');
-                          if (container && window.MutationObserver) {
-                            const observerCallback = debounce((mutations) => {
-                              cleanupOnce(container);
-                            }, 120);
-
-                            const observer = new MutationObserver(observerCallback);
-                            observer.observe(container, { childList: true, subtree: true });
-                            try { window.__twikooActionObserver = observer; } catch (e) { /* 忍错 */ }
-                          }
-                        })();
-                        // ===== 结束：Twikoo DOM 结构级修复 =====
+                        // 保存引用以便清理 (虽然 React 组件卸载会自动断开，但是个好习惯)
+                        window.__twikooObserver = observer;
 
                     }).catch(err => {
-                        console.error('Twikoo 初始化失败:', err);
+                        console.error('Twikoo init failed:', err);
                         setStatus('error');
                     });
                 } catch (e) {
-                    console.error("Twikoo 运行错误:", e);
                     setStatus('error');
                 }
             } else {
-                setTimeout(initTwikoo, 500);
+                setTimeout(initTwikoo, 500); // 重试
             }
         };
 
         requestAnimationFrame(initTwikoo);
-    }, []);
+        
+        return () => {
+             // 组件卸载时断开观察
+            if (window.__twikooObserver) window.__twikooObserver.disconnect();
+        }
+    }, [forceTranslateUI, fixIpLocation]); // 依赖项
 
     return (
         <div className={`${glassCardClass(darkMode)} flex flex-col`}>
-            {/* 标题 */}
+            {/* Header */}
             <div className={`p-4 border-b flex justify-between items-center ${darkMode ? 'border-gray-700/50' : 'border-gray-100'}`}>
                <h3 className="font-bold flex items-center gap-2 text-sm">
                  <MessageSquare size={16} className="text-pink-500"/> {t('guestbook.title')}
@@ -1149,7 +1021,7 @@ const Guestbook = ({ darkMode, hue, t }) => {
                {status === 'error' && <span className="text-[10px] text-red-500 font-bold">Failed</span>}
             </div>
 
-            {/* Twikoo 挂载点 */}
+            {/* Container */}
             <div className="p-4 relative" style={{ minHeight: '200px' }}>
                 <div id="tcomment"></div>
             </div>
@@ -1396,7 +1268,7 @@ const GithubBlogView = ({ darkMode, hue, t, lang }) => {
 };
 
 // 1. HomeView (Refactored Layout: Left - Center - Right)
-const HomeView = ({ hue, darkMode, t, lang }) => (
+const HomeView = ({ hue, darkMode, t, lang }) => ( // 确保这里解构出了 lang
   <div className="flex flex-col lg:flex-row gap-6 animate-fade-in-content items-start">
     
     {/* --- 左侧栏 (Profile, Tags) --- */}
@@ -1473,21 +1345,19 @@ const HomeView = ({ hue, darkMode, t, lang }) => (
         </div>
       </div>
 
-      {/* 这里可以继续放更多文章卡片 */}
       <div className={`p-8 rounded-3xl border border-dashed flex flex-col items-center justify-center text-center gap-2 opacity-50 ${darkMode ? 'border-gray-700 text-gray-500' : 'border-gray-300 text-gray-400'}`}>
          <Coffee size={32}/>
          <span>更多内容正在酝酿中...</span>
       </div>
 
-      {/* 3. 留言板功能框 (Twikoo Integration) - Moved Here */}
-      <Guestbook darkMode={darkMode} hue={hue} t={t} />
+      {/* 核心修改：这里将 lang 传给 Guestbook */}
+      <Guestbook darkMode={darkMode} hue={hue} t={t} lang={lang} />
 
     </div>
 
     {/* --- 右侧栏 (Welcome, Stats) --- */}
     <div className="w-full lg:w-[25%] flex-shrink-0 flex flex-col gap-6">
       
-      {/* 1. 欢迎语卡片 */}
       <div className={`${glassCardClass(darkMode)} p-6 relative overflow-hidden group`}>
         <div className="relative z-10">
           <h2 className="text-xl font-bold mb-3">{t('home.welcome_title')}</h2>
@@ -1500,13 +1370,43 @@ const HomeView = ({ hue, darkMode, t, lang }) => (
         </div>
       </div>
 
-      {/* 2. 站点信息卡片 (StatCard) */}
       <StatCard darkMode={darkMode} hue={hue} t={t} />
 
     </div>
   </div>
 );
+// --- Gallery Grid Component ---
+const GalleryGrid = ({ darkMode, hue, t }) => {
+  // 这里处理 galleryImages 为空的情况，直接显示空状态
+  if (!galleryImages || galleryImages.length === 0) {
+    return (
+      <div className={`flex flex-col items-center justify-center py-20 text-center opacity-60 border-2 border-dashed rounded-3xl ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+          <ImageIcon size={48} className="mb-4 text-gray-400" />
+          <p className="text-gray-500">{t('daily.empty')}</p>
+      </div>
+    );
+  }
 
+  return (
+    <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
+      {galleryImages.map((img, idx) => (
+        <div key={idx} className="break-inside-avoid relative group rounded-2xl overflow-hidden cursor-pointer">
+          <img 
+            src={img.url} 
+            alt={img.desc} 
+            className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-110" 
+            loading="lazy"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
+             <p className="text-white font-medium transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+               {img.desc}
+             </p>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
 // 2. DailyView
 const DailyView = ({ hue, darkMode, t }) => (
     <div className="flex flex-col gap-8 animate-fade-in-content">
@@ -1921,6 +1821,7 @@ const Navbar = ({
 // --- Main App ---
 
 export default function App() {
+  // 1. 初始化 Dark Mode
   const [darkMode, setDarkMode] = useState(() => {
     try {
       const saved = localStorage.getItem('darkMode');
@@ -1928,16 +1829,19 @@ export default function App() {
     } catch (e) { return false; }
   });
 
+  // 2. 初始化当前视图
   const [currentView, setCurrentView] = useState(() => {
      try {
        return localStorage.getItem('currentView') || 'home';
      } catch(e) { return 'home'; }
   });
 
+  // 3. 初始化主题色相
   const [hue, setHue] = useState(() => {
     try { return Number(localStorage.getItem('hue')) || 230; } catch (e) { return 230; }
   });
   
+  // 4. 初始化背景配置
   const [bgConfig, setBgConfig] = useState(() => {
     try {
       const saved = localStorage.getItem('bgConfig');
@@ -1945,10 +1849,12 @@ export default function App() {
     } catch (e) { return { url: WALLPAPER_PRESETS[0].url, blur: 3, opacity: 0.35 }; }
   });
 
+  // 5. 初始化语言 (核心)
   const [lang, setLang] = useState(() => {
     try { return localStorage.getItem('lang') || 'zh'; } catch (e) { return 'zh'; }
   });
 
+  // 6. 翻译函数
   const t = (key) => {
       const keys = key.split('.');
       let val = translations[lang];
@@ -1958,6 +1864,7 @@ export default function App() {
       return val || key;
   };
 
+  // --- Side Effects ---
   useEffect(() => {
     localStorage.setItem('darkMode', JSON.stringify(darkMode));
     if (darkMode) document.documentElement.classList.add('dark');
@@ -1981,8 +1888,10 @@ export default function App() {
 
   const toggleDarkMode = () => setDarkMode(!darkMode);
 
+  // --- 视图渲染器 ---
   const renderContent = () => {
       switch(currentView) {
+          // ★★★ 核心：确保这里传了 lang={lang} 给 HomeView ★★★
           case 'home': return <HomeView hue={hue} darkMode={darkMode} t={t} lang={lang} />;
           case 'daily': return <DailyView hue={hue} darkMode={darkMode} t={t} />;
           case 'projects': return <GithubBlogView darkMode={darkMode} hue={hue} t={t} lang={lang} />;
@@ -1997,6 +1906,7 @@ export default function App() {
     <div className={`flex flex-col min-h-screen transition-colors duration-300 font-sans selection:bg-pink-200 selection:text-pink-900 ${darkMode ? 'bg-gray-900' : 'bg-[#fdfbf8]'} relative`}>
       <GlobalStyles hue={hue} darkMode={darkMode} />
 
+      {/* 背景层 */}
       <div className="fixed top-0 left-0 w-full h-[100svh] pointer-events-none z-0 overflow-hidden">
         {bgConfig.url === 'default' ? (
             <>
