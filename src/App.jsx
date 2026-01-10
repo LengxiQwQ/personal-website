@@ -80,7 +80,7 @@ const GlobalStyles = ({ hue, darkMode }) => {
     .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(156, 163, 175, 0.8); }
 
     /* ========================================= */
-    /* --- Twikoo 终极修复 (修复头像 + 提示文字) --- */
+    /* --- Twikoo 样式净化与微调 --- */
     /* ========================================= */
     
     .tk-main, .tk-main * {
@@ -99,7 +99,7 @@ const GlobalStyles = ({ hue, darkMode }) => {
         padding: 0 !important;
     }
 
-    /* --- 1. 布局：强制垂直排列 --- */
+    /* --- 1. 布局：强制垂直排列 (Input区域) --- */
     .tk-submit .tk-row {
         display: flex !important;
         flex-direction: column !important;
@@ -108,7 +108,7 @@ const GlobalStyles = ({ hue, darkMode }) => {
         gap: 16px !important;
     }
 
-    /* --- 2. 头像 (已修复对齐) --- */
+    /* --- 2. 头像 (Input区域) --- */
     .tk-avatar {
         display: flex !important;
         justify-content: center;
@@ -138,190 +138,227 @@ const GlobalStyles = ({ hue, darkMode }) => {
         padding: 0 !important;
     }
 
-    /* --- 4. 昵称/邮箱/网址 (垂直堆叠) --- */
+    /* --- 4. 昵称/邮箱/网址 (Input区域 - 保留以防错位) --- */
     .tk-meta-input {
         display: flex !important;
         flex-direction: column !important;
-        gap: 12px !important;
+        gap: 10px !important;
         margin-bottom: 12px !important;
         width: 100% !important;
     }
     .tk-meta-input .el-input {
+        display: flex !important; 
+        flex-direction: row !important;
+        align-items: center !important;
         width: 100% !important;
         margin: 0 !important;
-    }
-    
-    /* --- 核心：输入框样式 (全透明边框，无动画) --- */
-    .tk-meta-input .el-input__inner,
-    .tk-input .el-textarea__inner {
-        width: 100% !important;
+        position: relative !important;
         background-color: ${darkMode ? 'rgba(0, 0, 0, 0.2)' : 'rgba(255, 255, 255, 0.5)'} !important;
+        border-radius: 12px !important;
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
-        
-        /* 边框：全透明 */
         border: 1px solid transparent !important; 
-        border-radius: 12px !important;
-        
-        /* 字体颜色 */
+        padding: 0 !important;
+        overflow: hidden !important; 
+    }
+    .tk-meta-input .el-input-group__prepend {
+        position: static !important;
+        display: block !important;
+        width: auto !important;
+        min-width: 60px !important; 
+        flex-shrink: 0 !important; 
+        background: transparent !important;
+        border: none !important;
+        color: ${darkMode ? '#9ca3af' : '#6b7280'} !important;
+        font-weight: 800 !important;
+        padding: 0 0 0 12px !important; 
+        font-size: 13px !important;
+        line-height: 44px !important;
+        height: 44px !important;
+        text-align: center !important;
+        white-space: nowrap !important;
+        box-shadow: none !important;
+    }
+    .tk-meta-input .el-input__inner {
+        position: static !important;
+        display: block !important;
+        flex: 1 !important; 
+        width: 100% !important; 
+        background: transparent !important;
+        border: none !important; 
+        border-radius: 0 !important;
         color: ${darkMode ? '#f3f4f6' : '#1f2937'} !important;
-        
-        /* 去除所有阴影和动画 */
         box-shadow: none !important;
         transition: none !important;
         transform: none !important;
-    }
-
-    /* 尺寸 */
-    .tk-meta-input .el-input__inner {
         height: 44px !important;
         line-height: 44px !important;
-        padding: 0 16px !important;
+        padding: 0 12px !important; 
     }
     .tk-input .el-textarea__inner {
+        width: 100% !important;
+        background-color: ${darkMode ? 'rgba(0, 0, 0, 0.2)' : 'rgba(255, 255, 255, 0.5)'} !important;
+        border: 1px solid transparent !important;
+        border-radius: 12px !important;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        color: ${darkMode ? '#f3f4f6' : '#1f2937'} !important;
+        box-shadow: none !important;
         min-height: 120px !important;
         padding: 16px !important;
         resize: none !important;
         margin-bottom: 4px !important;
+        transition: none !important;
     }
-
-    /* 聚焦状态 */
-    .tk-meta-input .el-input__inner:focus,
+    .tk-meta-input .el-input:focus-within,
     .tk-input .el-textarea__inner:focus {
         background-color: ${darkMode ? 'rgba(0, 0, 0, 0.4)' : 'rgba(255, 255, 255, 0.8)'} !important;
-        border-color: transparent !important;
-        box-shadow: none !important;
     }
+    .tk-main ::-webkit-input-placeholder { color: ${darkMode ? '#6b7280' : '#9ca3af'} !important; opacity: 0.7 !important; font-size: 12px !important; }
+    .tk-main ::-moz-placeholder { color: ${darkMode ? '#6b7280' : '#9ca3af'} !important; opacity: 0.7 !important; font-size: 12px !important; }
+    .tk-main ::placeholder { color: ${darkMode ? '#6b7280' : '#9ca3af'} !important; opacity: 0.7 !important; font-size: 12px !important; }
 
-    /* --- 关键修复：找回提示文字 (Placeholder) --- */
-    /* 我们把每个选择器单独写，避免浏览器因为不识别某个前缀而整行忽略 */
-    
-    /* Webkit (Chrome, Safari, Edge) */
-    .tk-main input::-webkit-input-placeholder {
-        color: ${darkMode ? '#d1d5db' : '#6b7280'} !important; 
-        opacity: 1 !important;
-    }
-    .tk-main textarea::-webkit-input-placeholder {
-        color: ${darkMode ? '#d1d5db' : '#6b7280'} !important;
-        opacity: 1 !important;
-    }
-
-    /* Mozilla Firefox */
-    .tk-main input::-moz-placeholder {
-        color: ${darkMode ? '#d1d5db' : '#6b7280'} !important;
-        opacity: 1 !important;
-    }
-    .tk-main textarea::-moz-placeholder {
-        color: ${darkMode ? '#d1d5db' : '#6b7280'} !important;
-        opacity: 1 !important;
-    }
-
-    /* Standard */
-    .tk-main input::placeholder {
-        color: ${darkMode ? '#d1d5db' : '#6b7280'} !important;
-        opacity: 1 !important;
-    }
-    .tk-main textarea::placeholder {
-        color: ${darkMode ? '#d1d5db' : '#6b7280'} !important;
-        opacity: 1 !important;
-    }
-
-    /* --- 5. 底部操作栏 --- */
-    .tk-row.actions {
-        display: flex !important;
-        flex-direction: row !important;
-        justify-content: space-between !important;
-        align-items: center !important;
-        width: 100% !important;
-        margin: 0 !important;
-        padding: 8px 0 0 0 !important;
-        position: relative !important;
-    }
-
-    /* 左侧图标 */
-    .tk-action-icon {
-        display: inline-flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        margin-right: 16px !important;
-        cursor: pointer !important;
-        color: ${darkMode ? '#9ca3af' : '#6b7280'} !important;
-        transition: none !important; /* 禁止动画 */
-    }
-    .tk-action-icon:hover {
-        color: ${darkMode ? '#ffffff' : '#000000'} !important; /* 仅变色 */
-    }
-
-    /* --- 右侧按钮容器 (无形容器) --- */
+    /* --- 5. 提交按钮 (Input区域) --- */
     .tk-submit {
         background: transparent !important;
         border: none !important;
         box-shadow: none !important;
-        color: ${themeColor} !important; /* 文字颜色 */
+        color: ${themeColor} !important;
         padding: 8px 24px !important;
         font-weight: 700 !important;
         font-size: 14px !important;
         cursor: pointer !important;
-        
-        /* 强制禁止所有动态效果 */
         transform: none !important;
         transition: none !important;
         animation: none !important;
     }
-    
-    /* 悬停/点击：绝对没有任何变化 */
-    .tk-submit:hover,
-    .tk-submit:active,
-    .tk-submit:focus {
+    .tk-submit:hover, .tk-submit:active, .tk-submit:focus {
         background: transparent !important;
-        transform: none !important;
-        box-shadow: none !important;
         opacity: 1 !important; 
         color: ${themeColor} !important;
     }
 
-    /* --- 6. 评论展示列表 --- */
-    .tk-comments-container {
-        margin-top: 32px !important;
-    }
-    .tk-comment {
-        margin-top: 20px !important;
-        padding: 20px !important;
-        background: ${darkMode ? 'rgba(30, 41, 59, 0.3)' : 'rgba(255, 255, 255, 0.4)'} !important;
-        border: 1px solid transparent !important;
-        border-radius: 16px !important;
-        backdrop-filter: blur(5px) !important;
-        transition: none !important;
-    }
-    .tk-comment .tk-avatar {
-        width: 44px !important;
-        height: 44px !important;
-        border: none !important;
-        margin-right: 16px !important;
-    }
-    .tk-nick {
-        font-size: 15px !important;
-        font-weight: 700 !important;
-        color: ${darkMode ? '#f3f4f6' : '#111827'} !important;
-    }
-    .tk-content {
-        margin-top: 8px !important;
-        font-size: 15px !important;
-        line-height: 1.7 !important;
-        color: ${darkMode ? '#d1d5db' : '#374151'} !important;
-    }
-    .tk-content a {
-        color: ${themeColor} !important;
-        text-decoration: none !important;
-        border-bottom: 1px dashed ${themeColor} !important;
+    /* ================================================= */
+    /* --- 6. 评论列表美化 (安全模式) --- */
+    /* ================================================= */
+    
+    .tk-comments-container { 
+        margin-top: 32px !important; 
     }
 
-    /* --- 7. 杂项隐藏 --- */
-    .tk-footer { display: none !important; }
-    .tk-icon.__comments { display: none !important; }
-    .tk-meta-input .el-input-group__prepend { display: none !important; }
+    /* 评论卡片：增加背景、圆角、阴影 */
+    .tk-comment {
+        margin-top: 16px !important;
+        padding: 20px !important;
+        background: ${darkMode ? 'rgba(30, 41, 59, 0.3)' : 'rgba(255, 255, 255, 0.4)'} !important;
+        border: 1px solid ${darkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.5)'} !important;
+        border-radius: 16px !important;
+        backdrop-filter: blur(8px) !important;
+        box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.05) !important;
+        transition: transform 0.2s ease, background 0.2s ease !important;
+    }
     
-    /* 预览框 */
+    .tk-comment:hover {
+        background: ${darkMode ? 'rgba(30, 41, 59, 0.5)' : 'rgba(255, 255, 255, 0.6)'} !important;
+        transform: translateY(-2px) !important;
+    }
+
+    /* 评论者头像 (列表内) */
+    .tk-comment .tk-avatar { 
+        width: 44px !important; 
+        height: 44px !important; 
+        border: 2px solid ${darkMode ? 'rgba(255,255,255,0.1)' : '#fff'} !important; 
+        margin-right: 16px !important; 
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+    }
+
+    /* 昵称 */
+    .tk-nick { 
+        font-size: 14px !important; 
+        font-weight: 800 !important; 
+        color: ${darkMode ? '#f3f4f6' : '#111827'} !important; 
+    }
+    
+    /* 评论内容 */
+    .tk-content { 
+        margin-top: 8px !important; 
+        font-size: 15px !important; 
+        line-height: 1.7 !important; 
+        color: ${darkMode ? '#d1d5db' : '#374151'} !important; 
+    }
+    .tk-content a { 
+        color: ${themeColor} !important; 
+        text-decoration: none !important; 
+        border-bottom: 1px dashed ${themeColor} !important; 
+    }
+    
+    /* --- 7. 元信息 (设备、时间) 极简微缩 --- */
+    
+    /* 容器布局 */
+    .tk-extras { 
+        margin-top: 8px !important; 
+        display: flex !important; 
+        flex-wrap: wrap !important; 
+        align-items: center !important;
+        gap: 6px !important; 
+        font-family: 'Nunito', monospace !important; 
+        opacity: 0.8 !important; 
+    }
+
+    /* 单个标签 (OS, Browser, Time) - 字体调小 */
+    .tk-extra, .tk-time {
+        display: inline-flex !important; 
+        align-items: center !important; 
+        font-size: 10px !important;  /* 核心：字体 10px */
+        color: ${darkMode ? '#9ca3af' : '#9ca3af'} !important;
+        background: ${darkMode ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)'} !important;
+        padding: 2px 6px !important; 
+        border-radius: 4px !important;
+        border: none !important;
+        line-height: 1.4 !important;
+        height: auto !important;
+    }
+    
+    .tk-time {
+        background: transparent !important;
+        padding-left: 0 !important;
+        margin-left: 2px !important;
+        font-size: 10px !important;
+    }
+
+    /* 核心：图标强制调小 */
+    .tk-extra .tk-icon, 
+    .tk-extra svg, 
+    .tk-extra img {
+        width: 10px !important;  
+        height: 10px !important; 
+        min-width: 10px !important;
+        margin-right: 3px !important; 
+        vertical-align: -1px !important;
+        display: inline-block !important; 
+        border: none !important;
+        background: transparent !important;
+        fill: currentColor !important;
+    }
+    
+    /* 隐藏多余的 Footer */
+    .tk-footer { display: none !important; }
+    
+    /* --- 新增：IP 属地样式 --- */
+    .tk-location {
+        font-size: 10px !important;
+        color: #9ca3af !important;
+        margin-left: 8px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        border: 1px solid transparent;
+        padding: 2px 6px;
+        background: ${darkMode ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)'} !important;
+        border-radius: 4px;
+        line-height: 1.4;
+    }
+    
+    /* 预览框样式 */
     .tk-preview-container {
         border: 1px dashed ${darkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'} !important;
         background: transparent !important;
@@ -330,6 +367,9 @@ const GlobalStyles = ({ hue, darkMode }) => {
         padding: 16px !important;
         width: 100% !important;
     }
+    
+    /* 强制移除重复的 Action Icon (如果依然存在) */
+    .tk-action-icon:nth-of-type(n+3) { display: none !important; }
   `}</style>
   );
 };
@@ -967,7 +1007,7 @@ const StatCard = ({ darkMode, hue, t }) => {
   );
 };
 
-// --- Twikoo Guestbook Component (CDN 版) ---
+// --- Twikoo Guestbook Component (CDN 版 + 自动修改提示文字) ---
 const Guestbook = ({ darkMode, hue, t }) => {
     const initialized = useRef(false);
     const [status, setStatus] = useState('loading'); // loading, success, error
@@ -990,6 +1030,97 @@ const Guestbook = ({ darkMode, hue, t }) => {
                     }).then(() => {
                         console.log('Twikoo 初始化成功');
                         setStatus('success');
+                        
+                        // --- 核心修改：保持 Placeholder 修改 (保留功能) ---
+                        setTimeout(() => {
+                            const inputs = document.querySelectorAll('.tk-meta-input .el-input__inner');
+                            if (inputs.length >= 3) {
+                                if (inputs[0].getAttribute('placeholder') !== '必填') inputs[0].setAttribute('placeholder', '必填');
+                                if (inputs[1].getAttribute('placeholder') !== '必填 用于头像识别') inputs[1].setAttribute('placeholder', '必填 用于头像识别');
+                                if (inputs[2].getAttribute('placeholder') !== '可选 用于跳转') inputs[2].setAttribute('placeholder', '可选 用于跳转');
+                            }
+                        }, 500);
+
+                        // ===== 开始：Twikoo DOM 结构级修复 & IP 属地显示 =====
+                        (function () {
+                          function cleanupOnce(root) {
+                            if (!root) return;
+                            root.querySelectorAll('.tk-comment').forEach(comment => {
+                              // 1) 保证每条评论只有第一个 .tk-action 容器
+                              const actions = comment.querySelectorAll('.tk-action');
+                              if (actions.length > 1) {
+                                for (let i = 1; i < actions.length; i++) {
+                                  try { actions[i].remove(); } catch (e) { /* 忍错 */ }
+                                }
+                              }
+                              
+                              // 2) IP 属地搬运与格式化
+                              // 查找元信息栏中的位置信息（通常是不包含 OS/Browser 关键词的文本）
+                              const meta = comment.querySelector('.tk-meta');
+                              const time = comment.querySelector('.tk-time');
+                              const extras = comment.querySelector('.tk-extras');
+                              
+                              if (meta && time && extras && !comment.querySelector('.tk-location')) {
+                                  let locationNode = null;
+                                  extras.querySelectorAll('.tk-extra').forEach(extra => {
+                                      // 排除常见的浏览器和系统关键词
+                                      const isUA = /Chrome|Safari|Firefox|Edge|Windows|Mac|Linux|Android|iOS/i.test(extra.innerText);
+                                      // 简单的判断：如果不包含 UA 关键词且有内容，或者是 SVG 图标，大概率是位置
+                                      if (!isUA && extra.innerText.trim().length > 0) {
+                                          locationNode = extra;
+                                      }
+                                  });
+
+                                  if (locationNode) {
+                                      // 格式化：将空格替换为点
+                                      const locText = locationNode.innerText.trim().replace(/\s+/g, '·'); 
+                                      const locSpan = document.createElement('span');
+                                      locSpan.className = 'tk-location';
+                                      locSpan.innerText = locText;
+                                      
+                                      // 插入到时间后面 (meta 的末尾，因为 time 通常是最后一个，或者 insertAfter time)
+                                      if (time.nextSibling) {
+                                          time.parentNode.insertBefore(locSpan, time.nextSibling);
+                                      } else {
+                                          time.parentNode.appendChild(locSpan);
+                                      }
+                                      
+                                      // 隐藏原始位置标签
+                                      locationNode.style.display = 'none';
+                                  }
+                              }
+                            });
+                          }
+
+                          // Debounce 辅助
+                          function debounce(fn, wait) {
+                            let t;
+                            return function () {
+                              clearTimeout(t);
+                              t = setTimeout(() => fn.apply(this, arguments), wait);
+                            };
+                          }
+
+                          // 入口：先一次性延迟清理
+                          setTimeout(() => {
+                            const container = document.getElementById('tcomment');
+                            if (container) cleanupOnce(container);
+                          }, 200);
+
+                          // 持续监听：使用 MutationObserver 保持结构正确
+                          const container = document.getElementById('tcomment');
+                          if (container && window.MutationObserver) {
+                            const observerCallback = debounce((mutations) => {
+                              cleanupOnce(container);
+                            }, 120);
+
+                            const observer = new MutationObserver(observerCallback);
+                            observer.observe(container, { childList: true, subtree: true });
+                            try { window.__twikooActionObserver = observer; } catch (e) { /* 忍错 */ }
+                          }
+                        })();
+                        // ===== 结束：Twikoo DOM 结构级修复 =====
+
                     }).catch(err => {
                         console.error('Twikoo 初始化失败:', err);
                         setStatus('error');
@@ -999,12 +1130,10 @@ const Guestbook = ({ darkMode, hue, t }) => {
                     setStatus('error');
                 }
             } else {
-                // 如果脚本还没加载完，或者 DOM 还没渲染完，稍后重试
                 setTimeout(initTwikoo, 500);
             }
         };
 
-        // 使用 requestAnimationFrame 开始尝试
         requestAnimationFrame(initTwikoo);
     }, []);
 
@@ -1266,12 +1395,223 @@ const GithubBlogView = ({ darkMode, hue, t, lang }) => {
   );
 };
 
-const GalleryGrid = ({ darkMode, hue, t }) => (
-    <div className="flex flex-col items-center justify-center py-20 text-center opacity-60">
-        <Camera size={48} className="mb-4 text-gray-400" />
-        <p className="text-gray-500">{t('daily.empty')}</p>
+// 1. HomeView (Refactored Layout: Left - Center - Right)
+const HomeView = ({ hue, darkMode, t, lang }) => (
+  <div className="flex flex-col lg:flex-row gap-6 animate-fade-in-content items-start">
+    
+    {/* --- 左侧栏 (Profile, Tags) --- */}
+    <div className="w-full lg:w-[25%] flex-shrink-0 flex flex-col gap-6">
+      <ProfileCardPro darkMode={darkMode} hue={hue} t={t} />
+      
+      <div className={`${glassCardClass(darkMode)} p-6`}>
+        <h4 className="font-bold flex items-center gap-2 mb-4">
+          <Tag size={18} className="text-blue-400" /> {t('home.tags_title')}
+        </h4>
+        <div className="flex flex-wrap gap-2">
+          {['React', 'Genshin', 'Music', 'Coding', 'Steam', 'Anime', 'Design', 'Next.js', 'TypeScript'].map(tag => (
+            <span 
+              key={tag} 
+              className={`text-xs px-3 py-1.5 rounded-lg cursor-pointer transition-all hover:text-white hover:scale-105 ${darkMode ? 'bg-gray-700/50' : 'bg-gray-100/80'}`} 
+              style={{ '--hover-bg': getThemeColor(hue, 1, 'dark') }} 
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = getThemeColor(hue, 1, 'dark')} 
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = ''}
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
+      </div>
     </div>
-)
+
+    {/* --- 中间栏 (Article Placeholder) --- */}
+    <div className="w-full lg:w-[50%] flex flex-col gap-6 min-w-0">
+      
+      {/* 示例文章卡片 */}
+      <div className={`${glassCardClass(darkMode)} group overflow-hidden hover:shadow-xl transition-all duration-300`}>
+        {/* 文章封面图 */}
+        <div className="h-64 w-full overflow-hidden relative">
+           <img 
+             src="https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800&auto=format&fit=crop" 
+             alt="Article Cover" 
+             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+           />
+           <div className="absolute top-4 left-4 bg-white/90 dark:bg-black/60 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold shadow-sm">
+             ☕️ 生活随笔
+           </div>
+        </div>
+
+        <div className="p-6 md:p-8">
+          <div className="flex items-center gap-3 text-xs text-gray-400 mb-3">
+            <span className="flex items-center gap-1"><Calendar size={12}/> 2026-01-09</span>
+            <span className="w-1 h-1 rounded-full bg-gray-300"></span>
+            <span className="flex items-center gap-1"><Clock size={12}/> 5 min read</span>
+          </div>
+
+          <h2 className={`text-2xl font-bold mb-4 leading-snug cursor-pointer transition-colors ${darkMode ? 'text-gray-100 group-hover:text-blue-400' : 'text-gray-800 group-hover:text-blue-600'}`}>
+            在无尽的构建中寻找秩序：我的重构日记
+          </h2>
+
+          <p className={`mb-6 line-clamp-3 leading-relaxed ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+            重构不仅仅是代码的清理，更是一种思维的重塑。当我们把旧的逻辑拆解，重新赋予它们新的结构时，仿佛也在梳理自己杂乱的思绪。在这篇文章中，我将分享我在重构首页布局时的心路历程，以及遇到的那些“坑”...
+          </p>
+
+          <div className="flex items-center justify-between">
+             <div className="flex -space-x-2">
+                {/* 模拟点赞头像 */}
+                {[1,2,3].map(i => (
+                  <div key={i} className={`w-8 h-8 rounded-full border-2 ${darkMode ? 'border-gray-800' : 'border-white'} overflow-hidden`}>
+                    <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${i}`} alt="user" className="w-full h-full object-cover"/>
+                  </div>
+                ))}
+                <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center text-[10px] font-bold ${darkMode ? 'border-gray-800 bg-gray-700' : 'border-white bg-gray-100'}`}>+12</div>
+             </div>
+             
+             <button className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold transition-all ${darkMode ? 'bg-white/10 hover:bg-white/20 text-white' : 'bg-black/5 hover:bg-black/10 text-gray-800'}`}>
+               阅读全文 <SkipForward size={14}/>
+             </button>
+          </div>
+        </div>
+      </div>
+
+      {/* 这里可以继续放更多文章卡片 */}
+      <div className={`p-8 rounded-3xl border border-dashed flex flex-col items-center justify-center text-center gap-2 opacity-50 ${darkMode ? 'border-gray-700 text-gray-500' : 'border-gray-300 text-gray-400'}`}>
+         <Coffee size={32}/>
+         <span>更多内容正在酝酿中...</span>
+      </div>
+
+      {/* 3. 留言板功能框 (Twikoo Integration) - Moved Here */}
+      <Guestbook darkMode={darkMode} hue={hue} t={t} />
+
+    </div>
+
+    {/* --- 右侧栏 (Welcome, Stats) --- */}
+    <div className="w-full lg:w-[25%] flex-shrink-0 flex flex-col gap-6">
+      
+      {/* 1. 欢迎语卡片 */}
+      <div className={`${glassCardClass(darkMode)} p-6 relative overflow-hidden group`}>
+        <div className="relative z-10">
+          <h2 className="text-xl font-bold mb-3">{t('home.welcome_title')}</h2>
+          <p className={`text-sm leading-relaxed whitespace-pre-line ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+            {t('home.welcome_text')}
+          </p>
+        </div>
+        <div className="absolute -right-4 -bottom-4 opacity-10 transform rotate-12 transition-transform group-hover:scale-110 duration-700">
+          <Sparkles size={120} />
+        </div>
+      </div>
+
+      {/* 2. 站点信息卡片 (StatCard) */}
+      <StatCard darkMode={darkMode} hue={hue} t={t} />
+
+    </div>
+  </div>
+);
+
+// 2. DailyView
+const DailyView = ({ hue, darkMode, t }) => (
+    <div className="flex flex-col gap-8 animate-fade-in-content">
+        <div className="flex items-center gap-3">
+             <div className="p-3 rounded-full bg-pink-100 dark:bg-pink-900/30 text-pink-500"><Camera size={24}/></div>
+             <div>
+                 <h2 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>{t('daily.gallery_title')}</h2>
+                 <p className="text-sm text-gray-400">{t('daily.gallery_desc')}</p>
+             </div>
+        </div>
+        <GalleryGrid darkMode={darkMode} hue={hue} t={t} />
+    </div>
+);
+
+// 3. LinksView
+const LinksView = ({ hue, darkMode, t }) => {
+    const [copied, setCopied] = useState(false);
+
+    const handleEmailClick = () => {
+        const email = "date200325@gmail.com";
+        navigator.clipboard.writeText(email);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2500);
+        window.location.href = `mailto:${email}`;
+    };
+
+    return (
+        <div className="animate-fade-in-content">
+             <div className="text-center mb-10">
+                 <h2 className={`text-3xl font-bold mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}>{t('links.title')}</h2>
+                 <p className={`${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{t('links.desc')}</p>
+             </div>
+             
+             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                 {/* 申请友链入口 */}
+                 <div 
+                   onClick={handleEmailClick}
+                   className={`flex flex-col items-center justify-center gap-2 p-6 rounded-2xl border border-dashed cursor-pointer transition-all hover:-translate-y-1 hover:shadow-lg ${darkMode ? 'border-gray-700 text-gray-500 hover:border-gray-500 hover:text-gray-300 bg-gray-800/20' : 'border-gray-300 text-gray-400 hover:border-gray-400 hover:text-gray-600 bg-gray-50/50'}`}
+                 >
+                     {copied ? (
+                         <div className="flex flex-col items-center animate-in zoom-in">
+                             <Check size={32} className="text-green-500 mb-2"/>
+                             <span className="text-sm font-bold text-green-500">{t('links.email_copied')}</span>
+                         </div>
+                     ) : (
+                         <div className="flex flex-col items-center">
+                             <MailIcon size={32} className="mb-2"/>
+                             <span className="text-sm font-medium">{t('links.apply')}</span>
+                             <span className="text-xs opacity-50 mt-1 flex items-center gap-1"><Copy size={10}/> {t('links.click_to_email')}</span>
+                         </div>
+                     )}
+                 </div>
+             </div>
+        </div>
+    );
+};
+
+// 4. AboutView
+const AboutView = ({ hue, darkMode, t }) => (
+    <div className="max-w-4xl mx-auto animate-fade-in-content">
+        <div className={`${glassCardClass(darkMode)} p-8 md:p-12`}>
+            <div className="mb-10 text-center md:text-left">
+                 <h1 className={`text-3xl font-bold mb-4 flex items-center gap-3 justify-center md:justify-start ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                    <Terminal size={32} className="text-blue-500"/> 
+                    {t('about.title')}
+                 </h1>
+                 <p className={`text-lg leading-relaxed whitespace-pre-line ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    {t('about.intro')}
+                 </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <section>
+                    <h3 className={`text-xl font-bold mb-4 flex items-center gap-2 border-b pb-2 ${darkMode ? 'border-gray-700 text-gray-100' : 'border-gray-200 text-gray-800'}`}>
+                        <Code size={20} className="text-blue-500"/> {t('about.tech_stack')}
+                    </h3>
+                    <ul className={`space-y-3 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                        <li className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-blue-400"></div>React 18 (Hooks & Functional Components)</li>
+                        <li className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-cyan-400"></div>Tailwind CSS (Utility-first Styling)</li>
+                        <li className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-orange-400"></div>Lucide React (Vector Icons)</li>
+                        <li className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-yellow-400"></div>JavaScript (ES6+)</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h3 className={`text-xl font-bold mb-4 flex items-center gap-2 border-b pb-2 ${darkMode ? 'border-gray-700 text-gray-100' : 'border-gray-200 text-gray-800'}`}>
+                        <Layout size={20} className="text-purple-500"/> {t('about.features')}
+                    </h3>
+                    <ul className={`space-y-3 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                        <li className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-purple-400"></div>Responsive Layout (Mobile First)</li>
+                        <li className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-pink-400"></div>Dark Mode Support</li>
+                        <li className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-green-400"></div>Glassmorphism Design</li>
+                        <li className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-indigo-400"></div>Custom Theme & Background</li>
+                    </ul>
+                </section>
+            </div>
+            
+            <div className={`mt-8 pt-6 border-t border-dashed ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+                <p className="text-center text-sm opacity-60">
+                    {t('about.version')}
+                </p>
+            </div>
+        </div>
+    </div>
+);
 
 const Navbar = ({ 
     darkMode, toggleDarkMode, hue, setHue, 
@@ -1577,226 +1917,6 @@ const Navbar = ({
     </nav>
   );
 };
-
-// --- Page Views ---
-
-// 2. DailyView
-const DailyView = ({ hue, darkMode, t }) => (
-    <div className="flex flex-col gap-8 animate-fade-in-content">
-        <div className="flex items-center gap-3">
-             <div className="p-3 rounded-full bg-pink-100 dark:bg-pink-900/30 text-pink-500"><Camera size={24}/></div>
-             <div>
-                 <h2 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>{t('daily.gallery_title')}</h2>
-                 <p className="text-sm text-gray-400">{t('daily.gallery_desc')}</p>
-             </div>
-        </div>
-        <GalleryGrid darkMode={darkMode} hue={hue} t={t} />
-    </div>
-);
-
-// 3. LinksView
-const LinksView = ({ hue, darkMode, t }) => {
-    const [copied, setCopied] = useState(false);
-
-    const handleEmailClick = () => {
-        const email = "date200325@gmail.com";
-        navigator.clipboard.writeText(email);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2500);
-        window.location.href = `mailto:${email}`;
-    };
-
-    return (
-        <div className="animate-fade-in-content">
-             <div className="text-center mb-10">
-                 <h2 className={`text-3xl font-bold mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`}>{t('links.title')}</h2>
-                 <p className={`${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{t('links.desc')}</p>
-             </div>
-             
-             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                 {/* 申请友链入口 */}
-                 <div 
-                   onClick={handleEmailClick}
-                   className={`flex flex-col items-center justify-center gap-2 p-6 rounded-2xl border border-dashed cursor-pointer transition-all hover:-translate-y-1 hover:shadow-lg ${darkMode ? 'border-gray-700 text-gray-500 hover:border-gray-500 hover:text-gray-300 bg-gray-800/20' : 'border-gray-300 text-gray-400 hover:border-gray-400 hover:text-gray-600 bg-gray-50/50'}`}
-                 >
-                     {copied ? (
-                         <div className="flex flex-col items-center animate-in zoom-in">
-                             <Check size={32} className="text-green-500 mb-2"/>
-                             <span className="text-sm font-bold text-green-500">{t('links.email_copied')}</span>
-                         </div>
-                     ) : (
-                         <div className="flex flex-col items-center">
-                             <MailIcon size={32} className="mb-2"/>
-                             <span className="text-sm font-medium">{t('links.apply')}</span>
-                             <span className="text-xs opacity-50 mt-1 flex items-center gap-1"><Copy size={10}/> {t('links.click_to_email')}</span>
-                         </div>
-                     )}
-                 </div>
-             </div>
-        </div>
-    );
-};
-
-// 4. AboutView
-const AboutView = ({ hue, darkMode, t }) => (
-    <div className="max-w-4xl mx-auto animate-fade-in-content">
-        <div className={`${glassCardClass(darkMode)} p-8 md:p-12`}>
-            <div className="mb-10 text-center md:text-left">
-                 <h1 className={`text-3xl font-bold mb-4 flex items-center gap-3 justify-center md:justify-start ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                    <Terminal size={32} className="text-blue-500"/> 
-                    {t('about.title')}
-                 </h1>
-                 <p className={`text-lg leading-relaxed whitespace-pre-line ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                    {t('about.intro')}
-                 </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <section>
-                    <h3 className={`text-xl font-bold mb-4 flex items-center gap-2 border-b pb-2 ${darkMode ? 'border-gray-700 text-gray-100' : 'border-gray-200 text-gray-800'}`}>
-                        <Code size={20} className="text-blue-500"/> {t('about.tech_stack')}
-                    </h3>
-                    <ul className={`space-y-3 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                        <li className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-blue-400"></div>React 18 (Hooks & Functional Components)</li>
-                        <li className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-cyan-400"></div>Tailwind CSS (Utility-first Styling)</li>
-                        <li className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-orange-400"></div>Lucide React (Vector Icons)</li>
-                        <li className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-yellow-400"></div>JavaScript (ES6+)</li>
-                    </ul>
-                </section>
-
-                <section>
-                    <h3 className={`text-xl font-bold mb-4 flex items-center gap-2 border-b pb-2 ${darkMode ? 'border-gray-700 text-gray-100' : 'border-gray-200 text-gray-800'}`}>
-                        <Layout size={20} className="text-purple-500"/> {t('about.features')}
-                    </h3>
-                    <ul className={`space-y-3 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                        <li className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-purple-400"></div>Responsive Layout (Mobile First)</li>
-                        <li className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-pink-400"></div>Dark Mode Support</li>
-                        <li className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-green-400"></div>Glassmorphism Design</li>
-                        <li className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-indigo-400"></div>Custom Theme & Background</li>
-                    </ul>
-                </section>
-            </div>
-            
-            <div className={`mt-8 pt-6 border-t border-dashed ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
-                <p className="text-center text-sm opacity-60">
-                    {t('about.version')}
-                </p>
-            </div>
-        </div>
-    </div>
-);
-
-// 1. HomeView (Refactored Layout: Left - Center - Right)
-const HomeView = ({ hue, darkMode, t, lang }) => (
-  <div className="flex flex-col lg:flex-row gap-6 animate-fade-in-content items-start">
-    
-    {/* --- 左侧栏 (Profile, Tags) --- */}
-    <div className="w-full lg:w-[25%] flex-shrink-0 flex flex-col gap-6">
-      <ProfileCardPro darkMode={darkMode} hue={hue} t={t} />
-      
-      <div className={`${glassCardClass(darkMode)} p-6`}>
-        <h4 className="font-bold flex items-center gap-2 mb-4">
-          <Tag size={18} className="text-blue-400" /> {t('home.tags_title')}
-        </h4>
-        <div className="flex flex-wrap gap-2">
-          {['React', 'Genshin', 'Music', 'Coding', 'Steam', 'Anime', 'Design', 'Next.js', 'TypeScript'].map(tag => (
-            <span 
-              key={tag} 
-              className={`text-xs px-3 py-1.5 rounded-lg cursor-pointer transition-all hover:text-white hover:scale-105 ${darkMode ? 'bg-gray-700/50' : 'bg-gray-100/80'}`} 
-              style={{ '--hover-bg': getThemeColor(hue, 1, 'dark') }} 
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = getThemeColor(hue, 1, 'dark')} 
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = ''}
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
-      </div>
-    </div>
-
-    {/* --- 中间栏 (Article Placeholder) --- */}
-    <div className="w-full lg:w-[50%] flex flex-col gap-6 min-w-0">
-      
-      {/* 示例文章卡片 */}
-      <div className={`${glassCardClass(darkMode)} group overflow-hidden hover:shadow-xl transition-all duration-300`}>
-        {/* 文章封面图 */}
-        <div className="h-64 w-full overflow-hidden relative">
-           <img 
-             src="https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800&auto=format&fit=crop" 
-             alt="Article Cover" 
-             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-           />
-           <div className="absolute top-4 left-4 bg-white/90 dark:bg-black/60 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold shadow-sm">
-             ☕️ 生活随笔
-           </div>
-        </div>
-
-        <div className="p-6 md:p-8">
-          <div className="flex items-center gap-3 text-xs text-gray-400 mb-3">
-            <span className="flex items-center gap-1"><Calendar size={12}/> 2026-01-09</span>
-            <span className="w-1 h-1 rounded-full bg-gray-300"></span>
-            <span className="flex items-center gap-1"><Clock size={12}/> 5 min read</span>
-          </div>
-
-          <h2 className={`text-2xl font-bold mb-4 leading-snug cursor-pointer transition-colors ${darkMode ? 'text-gray-100 group-hover:text-blue-400' : 'text-gray-800 group-hover:text-blue-600'}`}>
-            在无尽的构建中寻找秩序：我的重构日记
-          </h2>
-
-          <p className={`mb-6 line-clamp-3 leading-relaxed ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-            重构不仅仅是代码的清理，更是一种思维的重塑。当我们把旧的逻辑拆解，重新赋予它们新的结构时，仿佛也在梳理自己杂乱的思绪。在这篇文章中，我将分享我在重构首页布局时的心路历程，以及遇到的那些“坑”...
-          </p>
-
-          <div className="flex items-center justify-between">
-             <div className="flex -space-x-2">
-                {/* 模拟点赞头像 */}
-                {[1,2,3].map(i => (
-                  <div key={i} className={`w-8 h-8 rounded-full border-2 ${darkMode ? 'border-gray-800' : 'border-white'} overflow-hidden`}>
-                    <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${i}`} alt="user" className="w-full h-full object-cover"/>
-                  </div>
-                ))}
-                <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center text-[10px] font-bold ${darkMode ? 'border-gray-800 bg-gray-700' : 'border-white bg-gray-100'}`}>+12</div>
-             </div>
-             
-             <button className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold transition-all ${darkMode ? 'bg-white/10 hover:bg-white/20 text-white' : 'bg-black/5 hover:bg-black/10 text-gray-800'}`}>
-               阅读全文 <SkipForward size={14}/>
-             </button>
-          </div>
-        </div>
-      </div>
-
-      {/* 这里可以继续放更多文章卡片 */}
-      <div className={`p-8 rounded-3xl border border-dashed flex flex-col items-center justify-center text-center gap-2 opacity-50 ${darkMode ? 'border-gray-700 text-gray-500' : 'border-gray-300 text-gray-400'}`}>
-         <Coffee size={32}/>
-         <span>更多内容正在酝酿中...</span>
-      </div>
-
-    </div>
-
-    {/* --- 右侧栏 (Welcome, Stats, Guestbook) --- */}
-    <div className="w-full lg:w-[25%] flex-shrink-0 flex flex-col gap-6">
-      
-      {/* 1. 欢迎语卡片 */}
-      <div className={`${glassCardClass(darkMode)} p-6 relative overflow-hidden group`}>
-        <div className="relative z-10">
-          <h2 className="text-xl font-bold mb-3">{t('home.welcome_title')}</h2>
-          <p className={`text-sm leading-relaxed whitespace-pre-line ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-            {t('home.welcome_text')}
-          </p>
-        </div>
-        <div className="absolute -right-4 -bottom-4 opacity-10 transform rotate-12 transition-transform group-hover:scale-110 duration-700">
-          <Sparkles size={120} />
-        </div>
-      </div>
-
-      {/* 2. 站点信息卡片 (StatCard) */}
-      <StatCard darkMode={darkMode} hue={hue} t={t} />
-
-      {/* 3. 留言板功能框 (Twikoo Integration) */}
-      <Guestbook darkMode={darkMode} hue={hue} t={t} />
-
-    </div>
-  </div>
-);
 
 // --- Main App ---
 
